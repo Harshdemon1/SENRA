@@ -5,9 +5,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.environ["DATABASE_URL"]
+# Falls back to local SQLite — no Supabase needed for local dev
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///./scfi.db")
 
-engine = create_async_engine(DATABASE_URL, echo=False, pool_pre_ping=True)
+_kwargs: dict = {}
+if DATABASE_URL.startswith("sqlite"):
+    _kwargs = {"connect_args": {"check_same_thread": False}}
+
+engine = create_async_engine(DATABASE_URL, echo=False, pool_pre_ping=not DATABASE_URL.startswith("sqlite"), **_kwargs)
 AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 

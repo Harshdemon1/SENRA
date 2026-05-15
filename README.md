@@ -31,11 +31,27 @@ Browser
 
 ---
 
-## Quick Start (no API keys required)
+## Quick Start — Zero config, no accounts needed
 
-The app ships with realistic fallback data for all 36 states — it works without `DATA_GOV_IN_API_KEY`.
+No Supabase. No Upstash. No API keys. Uses SQLite + in-memory cache by default.
 
-### Backend
+### Windows (one double-click)
+
+```
+start.bat
+```
+
+### macOS / Linux (one command)
+
+```bash
+chmod +x start.sh && ./start.sh
+```
+
+That's it. Opens `http://localhost:3000` automatically.
+
+---
+
+### Manual setup (if you prefer)
 
 ```bash
 cd backend
