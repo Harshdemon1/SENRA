@@ -1,10 +1,46 @@
+import json
 from sqlalchemy import (
     Column, Integer, String, Boolean, Numeric, BigInteger,
-    Date, DateTime, Text, ARRAY, ForeignKey, UniqueConstraint, Index
+    Date, DateTime, Text, ForeignKey, UniqueConstraint, Index, TypeDecorator
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.types import JSON
 from sqlalchemy.sql import func
-from database import Base
+from database import Base, DATABASE_URL
+
+
+# Use JSONB on Postgres, plain JSON (stored as text) on SQLite
+def _json_col():
+    if DATABASE_URL.startswith("postgresql"):
+        from sqlalchemy.dialects.postgresql import JSONB
+        return JSONB
+    return JSON
+
+
+# SQLite doesn't have ARRAY — store as JSON text
+class JsonArray(TypeDecorator):
+    impl = Text
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+        return json.dumps(value)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return []
+        try:
+            return json.loads(value)
+        except Exception:
+            return []
+
+
+def _array_col():
+    if DATABASE_URL.startswith("postgresql"):
+        from sqlalchemy.dialects.postgresql import ARRAY
+        from sqlalchemy import Text as T
+        return ARRAY(T)
+    return JsonArray
 
 
 class State(Base):
@@ -28,7 +64,7 @@ class RawDataSnapshot(Base):
     )
 
     id = Column(Integer, primary_key=True)
-    state_id = Column(Integer, ForeignKey("states.id", ondelete="CASCADE"), nullable=False)
+    state_id = Column(Integer, ForeignKey("states.id"), nullable=False)
     snapshot_date = Column(Date, nullable=False)
     road_quality_raw = Column(Numeric)
     business_density_raw = Column(Numeric)
@@ -38,7 +74,7 @@ class RawDataSnapshot(Base):
     cold_chain_infra_raw = Column(Numeric)
     market_concentration_raw = Column(Numeric)
     data_completeness = Column(Numeric)
-    sources_used = Column(JSONB)
+    sources_used = Column(_json_col()())
 
 
 class FragilityScore(Base):
@@ -50,8 +86,8 @@ class FragilityScore(Base):
     )
 
     id = Column(Integer, primary_key=True)
-    state_id = Column(Integer, ForeignKey("states.id", ondelete="CASCADE"), nullable=False)
-    computed_at = Column(DateTime(timezone=True), server_default=func.now())
+    state_id = Column(Integer, ForeignKey("states.id"), nullable=False)
+    computed_at = Column(DateTime, server_default=func.now())
     score = Column(Numeric, nullable=False)
     rank = Column(Integer, nullable=False)
     band = Column(String(20), nullable=False)
@@ -63,7 +99,7 @@ class FragilityScore(Base):
     subscore_power = Column(Numeric)
     subscore_cold_chain = Column(Numeric)
     subscore_concentration = Column(Numeric)
-    imputed_dimensions = Column(ARRAY(Text))
+    imputed_dimensions = Column(_array_col()())
     sector_preset = Column(String(50), default="default")
 
 
@@ -71,8 +107,8 @@ class DataRefreshLog(Base):
     __tablename__ = "data_refresh_log"
 
     id = Column(Integer, primary_key=True)
-    ran_at = Column(DateTime(timezone=True), server_default=func.now())
+    ran_at = Column(DateTime, server_default=func.now())
     status = Column(String(20))
-    sources_ok = Column(JSONB)
+    sources_ok = Column(_json_col()())
     states_count = Column(Integer)
     error_msg = Column(Text)

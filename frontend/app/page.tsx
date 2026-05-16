@@ -1,13 +1,20 @@
 'use client'
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { useScores, useMeta } from '@/lib/api'
-import { IndiaMap } from '@/components/map/IndiaMap'
 import { ScoreRanking } from '@/components/dashboard/ScoreRanking'
 import { WeightSliders } from '@/components/dashboard/WeightSliders'
 import { SectorToggle, useSectorStore } from '@/components/dashboard/SectorToggle'
 import { AnalystChat } from '@/components/ai/AnalystChat'
+import { Skeleton } from '@/components/ui/Skeleton'
 import type { StateScore } from '@/lib/types'
+
+// Lazy-load the map — react-simple-maps + d3 is heavy (~200 KB)
+const IndiaMap = dynamic(
+  () => import('@/components/map/IndiaMap').then(m => m.IndiaMap),
+  { ssr: false, loading: () => <Skeleton className="w-full h-full" /> }
+)
 
 export default function DashboardPage() {
   const { sector } = useSectorStore()

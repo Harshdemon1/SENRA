@@ -12,7 +12,7 @@ _redis: aioredis.Redis | None = None
 
 
 def _use_redis() -> bool:
-    return bool(os.environ.get("REDIS_URL"))
+    return bool(os.environ.get("REDIS_URL", "").strip())
 
 
 async def _get_redis() -> aioredis.Redis:

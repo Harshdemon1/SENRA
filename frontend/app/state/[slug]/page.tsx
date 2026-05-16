@@ -11,7 +11,7 @@ import Link from 'next/link'
 async function getStateProfile(slug: string): Promise<StateProfile | null> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
   try {
-    const r = await fetch(`${apiUrl}/api/scores/${slug}`, { next: { revalidate: 300 } })
+    const r = await fetch(`${apiUrl}/api/scores/${slug}`, { next: { revalidate: 60 } })
     if (!r.ok) return null
     return r.json()
   } catch {
