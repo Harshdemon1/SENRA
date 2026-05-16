@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Falls back to local SQLite — no Supabase needed for local dev
-DATABASE_URL = os.environ.get("DATABASE_URL") or "sqlite+aiosqlite:///./sentr.db"
+DATABASE_URL = os.environ.get("DATABASE_URL") or "sqlite+aiosqlite:///./senra.db"
 
 _kwargs: dict = {}
 if DATABASE_URL.startswith("sqlite"):

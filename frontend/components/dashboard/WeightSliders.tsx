@@ -43,7 +43,7 @@ export const useWeightsStore = create<WeightsStore>()(
         }),
       resetTo: weights => set({ weights }),
     }),
-    { name: 'sentr-weights' }
+    { name: 'senra-weights' }
   )
 )
 

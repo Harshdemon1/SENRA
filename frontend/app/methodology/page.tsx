@@ -6,7 +6,7 @@ export default function MethodologyPage() {
     <div className="px-6 py-10 max-w-3xl mx-auto">
       <h1 className="text-3xl font-semibold text-text-primary mb-2">Methodology</h1>
       <p className="text-text-secondary mb-10">
-        SENTR is computed from publicly available government data.
+        SENRA is computed from publicly available government data.
         This page documents every decision made in the scoring process.
       </p>
 
@@ -170,11 +170,11 @@ export default function MethodologyPage() {
       <section className="mb-10">
         <h2 className="text-lg font-semibold text-text-primary mb-4">9. How to Cite</h2>
         <div className="bg-bg-surface rounded-xl p-4 font-mono text-xs text-text-primary whitespace-pre-wrap">
-{`@misc{sentr2026,
-  title  = {SENTR — Supply Chain Risk Intelligence},
+{`@misc{senra2026,
+  title  = {SENRA — Supply Chain Risk Intelligence},
   author = {Harsh Menon},
   year   = {2026},
-  url    = {https://github.com/Harshdemon1/SENTR},
+  url    = {https://github.com/Harshdemon1/SENRA},
   note   = {Open source under MIT License. Data from Government of India.}
 }`}
         </div>

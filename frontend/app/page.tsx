@@ -32,7 +32,7 @@ export default function DashboardPage() {
         className="flex items-start justify-between mb-6 flex-wrap gap-4"
       >
         <div>
-          <h1 className="text-2xl font-semibold text-text-primary">SENTR</h1>
+          <h1 className="text-2xl font-semibold text-text-primary">SENRA</h1>
           <p className="text-sm text-text-secondary mt-1">
             Ranking supply chain risk across 36 states and UTs{' '}
             <a href="/methodology" className="text-accent hover:underline">→ Methodology</a>

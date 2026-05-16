@@ -1,8 +1,8 @@
-# SENTR — Supply Chain Risk Intelligence
+# SENRA — Supply Chain Risk Intelligence
 
 > The first public, algorithmically-derived ranking of retail supply chain fragility across all 28 Indian states and 8 Union Territories.
 
-**[Live App →](https://sentr.vercel.app)** | **[Methodology →](/methodology)**
+**[Live App →](https://senra.vercel.app)** | **[Methodology →](/methodology)**
 
 ---
 
@@ -171,11 +171,11 @@ The file must have `properties.ST_NM` matching state display names (e.g. `"Tamil
 ## Cite This Project
 
 ```bibtex
-@misc{sentr2026,
-  title  = {SENTR — Supply Chain Risk Intelligence},
+@misc{senra2026,
+  title  = {SENRA — Supply Chain Risk Intelligence},
   author = {Harsh Menon},
   year   = {2026},
-  url    = {https://github.com/Harshdemon1/SENTR},
+  url    = {https://github.com/Harshdemon1/SENRA},
   note   = {Open source under MIT License.}
 }
 ```
