@@ -3,7 +3,6 @@ import { Badge } from '@/components/ui/Badge'
 import { ScoreBar } from '@/components/ui/ScoreBar'
 import { MetricRadar } from '@/components/dashboard/MetricRadar'
 import { TrendChart } from '@/components/dashboard/TrendChart'
-import { AnalystChat } from '@/components/ai/AnalystChat'
 import { DIMENSIONS } from '@/lib/constants'
 import type { StateProfile } from '@/lib/types'
 import Link from 'next/link'
@@ -155,7 +154,6 @@ export default async function StatePage({ params }: { params: { slug: string } }
         </div>
       )}
 
-      <AnalystChat context={profile} sector="default" />
-    </div>
+</div>
   )
 }

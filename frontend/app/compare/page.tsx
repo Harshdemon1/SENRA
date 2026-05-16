@@ -6,7 +6,6 @@ import { MetricRadar } from '@/components/dashboard/MetricRadar'
 import { Badge } from '@/components/ui/Badge'
 import { ScoreBar } from '@/components/ui/ScoreBar'
 import { Skeleton } from '@/components/ui/Skeleton'
-import { AnalystChat } from '@/components/ai/AnalystChat'
 import { DIMENSIONS, SLUG_TO_STATE_NAME } from '@/lib/constants'
 import { Suspense } from 'react'
 
@@ -126,8 +125,7 @@ function CompareContent() {
             </table>
           </div>
 
-          <AnalystChat context={data.states} sector="default" />
-        </>
+</>
       )}
     </div>
   )

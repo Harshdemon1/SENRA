@@ -6,7 +6,6 @@ import { useScores, useMeta } from '@/lib/api'
 import { ScoreRanking } from '@/components/dashboard/ScoreRanking'
 import { WeightSliders } from '@/components/dashboard/WeightSliders'
 import { SectorToggle, useSectorStore } from '@/components/dashboard/SectorToggle'
-import { AnalystChat } from '@/components/ai/AnalystChat'
 import { Skeleton } from '@/components/ui/Skeleton'
 import type { StateScore } from '@/lib/types'
 
@@ -121,10 +120,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* AI Chat */}
-      {displayStates && displayStates.length > 0 && (
-        <AnalystChat context={displayStates} sector={sector} />
-      )}
     </div>
   )
 }
