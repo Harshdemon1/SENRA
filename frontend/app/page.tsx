@@ -33,9 +33,10 @@ export default function DashboardPage() {
         className="flex items-start justify-between mb-6 flex-wrap gap-4"
       >
         <div>
-          <h1 className="text-2xl font-semibold text-text-primary">India Supply Chain Fragility Index</h1>
+          <h1 className="text-2xl font-semibold text-text-primary">SENTR</h1>
           <p className="text-sm text-text-secondary mt-1">
-            Ranking supply chain risk across 36 states and UTs
+            Ranking supply chain risk across 36 states and UTs{' '}
+            <a href="/methodology" className="text-accent hover:underline">→ Methodology</a>
           </p>
         </div>
         <div className="flex flex-col items-end gap-2">
@@ -49,6 +50,14 @@ export default function DashboardPage() {
           )}
         </div>
       </motion.div>
+
+      {/* Data notice */}
+      <div className="mb-4 px-3 py-2 bg-bg-base border border-border-default rounded-lg text-xs text-text-secondary flex items-center gap-2">
+        <span className="text-accent">ℹ</span>
+        All scores are computed from 2023–24 government estimates. Live data requires{' '}
+        <code className="numeric text-text-primary">USE_LIVE_DATA=true</code> and a{' '}
+        <code className="numeric text-text-primary">DATA_GOV_IN_API_KEY</code>.
+      </div>
 
       {/* Main layout */}
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_380px] gap-6">
@@ -100,10 +109,7 @@ export default function DashboardPage() {
           )}
 
           {/* Rankings */}
-          <div
-            className="bg-bg-base border border-border-default rounded-2xl overflow-hidden flex flex-col"
-            style={{ maxHeight: 420 }}
-          >
+          <div className="bg-bg-base border border-border-default rounded-2xl overflow-hidden flex flex-col max-h-[420px]">
             <div className="px-4 py-3 border-b border-border-subtle text-xs text-text-tertiary font-medium">
               All States — Ranked by Fragility
             </div>
@@ -117,7 +123,7 @@ export default function DashboardPage() {
 
       {/* AI Chat */}
       {displayStates && displayStates.length > 0 && (
-        <AnalystChat context={displayStates.slice(0, 10)} sector={sector} />
+        <AnalystChat context={displayStates} sector={sector} />
       )}
     </div>
   )

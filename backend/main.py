@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="India Supply Chain Fragility Index API",
+    title="SENTR API",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -63,7 +63,7 @@ app.include_router(meta.router)
 
 @app.get("/")
 async def root():
-    return {"name": "SCFI API", "version": "1.0.0", "docs": "/docs"}
+    return {"name": "SENTR API", "version": "1.0.0", "docs": "/docs"}
 
 
 @app.get("/api/health")

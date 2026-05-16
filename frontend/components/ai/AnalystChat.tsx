@@ -2,7 +2,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { StateScore } from '@/lib/types'
-import { DIMENSIONS } from '@/lib/constants'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -46,6 +45,10 @@ export function AnalystChat({ context, sector = 'default' }: AnalystChatProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question, context, sector }),
       })
+      if (!r.ok) {
+        const errData = await r.json().catch(() => ({ error: `HTTP ${r.status}` }))
+        throw new Error(errData.error ?? `HTTP ${r.status}`)
+      }
       const reader = r.body?.getReader()
       const decoder = new TextDecoder()
       if (!reader) return
@@ -62,10 +65,11 @@ export function AnalystChat({ context, sector = 'default' }: AnalystChatProps) {
           return copy
         })
       }
-    } catch (e) {
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Sorry, the analyst is unavailable right now.'
       setMessages(m => {
         const copy = [...m]
-        copy[copy.length - 1] = { role: 'assistant', content: 'Sorry, the analyst is unavailable right now.' }
+        copy[copy.length - 1] = { role: 'assistant', content: msg }
         return copy
       })
     } finally {
@@ -74,7 +78,7 @@ export function AnalystChat({ context, sector = 'default' }: AnalystChatProps) {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-40">
+    <div className="fixed bottom-0 right-0 z-40 flex flex-col items-end pb-6 pr-6">
       <AnimatePresence>
         {open && (
           <motion.div
@@ -82,7 +86,7 @@ export function AnalystChat({ context, sector = 'default' }: AnalystChatProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.95 }}
             className="mb-3 w-80 bg-bg-base border border-border-default rounded-2xl shadow-2xl flex flex-col"
-            style={{ height: 420 }}
+            style={{ height: 'min(420px, calc(100vh - 80px))' }}
           >
             <div className="px-4 py-3 border-b border-border-subtle flex items-center justify-between">
               <div>

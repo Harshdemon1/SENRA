@@ -34,22 +34,31 @@ async def compare_states(
     if not latest_at:
         raise HTTPException(404, "No scores found — run seed.py first")
 
+    # Batch query 1: all states at once
+    states_result = await db.execute(select(State).where(State.slug.in_(slugs)))
+    states_map = {s.slug: s for s in states_result.scalars().all()}
+
+    missing = [slug for slug in slugs if slug not in states_map]
+    if missing:
+        raise HTTPException(404, f"State(s) not found: {', '.join(missing)}")
+
+    state_ids = [states_map[slug].id for slug in slugs]
+
+    # Batch query 2: all scores at once
+    fs_result = await db.execute(
+        select(FragilityScore)
+        .where(
+            FragilityScore.state_id.in_(state_ids),
+            FragilityScore.sector_preset == sector,
+            FragilityScore.computed_at == latest_at,
+        )
+    )
+    fs_map = {fs.state_id: fs for fs in fs_result.scalars().all()}
+
     result_states = []
     for slug in slugs:
-        state_row = await db.execute(select(State).where(State.slug == slug))
-        state = state_row.scalar_one_or_none()
-        if state is None:
-            raise HTTPException(404, f"State '{slug}' not found")
-
-        fs_row = await db.execute(
-            select(FragilityScore)
-            .where(
-                FragilityScore.state_id == state.id,
-                FragilityScore.sector_preset == sector,
-                FragilityScore.computed_at == latest_at,
-            )
-        )
-        fs = fs_row.scalar_one_or_none()
+        state = states_map[slug]
+        fs = fs_map.get(state.id)
         if fs is None:
             raise HTTPException(404, f"No score for '{slug}' in sector '{sector}'")
 

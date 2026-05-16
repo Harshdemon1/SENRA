@@ -123,6 +123,35 @@ def _score_to_band(score: float) -> str:
     return "LOW"
 
 
+def _assign_bands_by_percentile(results: list) -> list:
+    """
+    Assign risk bands by rank position rather than fixed score thresholds.
+    Results must be sorted by score descending before calling.
+    Top 20% = CRITICAL, next 30% = HIGH, next 30% = MODERATE, bottom 20% = LOW.
+    Falls back to fixed thresholds if fewer than 5 states.
+    """
+    n = len(results)
+    if n < 5:
+        for r in results:
+            r["band"] = _score_to_band(r["score"])
+        return results
+
+    critical_n = max(1, round(n * 0.20))
+    high_n     = max(1, round(n * 0.30))
+    moderate_n = max(1, round(n * 0.30))
+
+    for i, r in enumerate(results):
+        if i < critical_n:
+            r["band"] = "CRITICAL"
+        elif i < critical_n + high_n:
+            r["band"] = "HIGH"
+        elif i < critical_n + high_n + moderate_n:
+            r["band"] = "MODERATE"
+        else:
+            r["band"] = "LOW"
+    return results
+
+
 def compute_fragility_scores(
     raw_data: dict,
     weights: dict | None = None,
@@ -162,7 +191,7 @@ def compute_fragility_scores(
             "state":        state,
             "score":        round(composite, 2),
             "rank":         None,
-            "band":         _score_to_band(composite),
+            "band":         "",
             "confidence":   round(confidence, 1),
             "subscores":    {k: round(v, 2) for k, v in subscores.items()},
             "raw_values":   raw_data[state],
@@ -172,5 +201,7 @@ def compute_fragility_scores(
     results.sort(key=lambda x: x["score"], reverse=True)
     for rank, r in enumerate(results, start=1):
         r["rank"] = rank
+
+    _assign_bands_by_percentile(results)
 
     return results

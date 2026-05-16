@@ -2,8 +2,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useEffect, useRef, useState } from 'react'
-import { DIMENSIONS, DEFAULT_WEIGHTS, SECTOR_PRESETS } from '@/lib/constants'
-import type { WeightsMap, SectorPresetKey } from '@/lib/types'
+import { DIMENSIONS, DEFAULT_WEIGHTS } from '@/lib/constants'
+import type { WeightsMap } from '@/lib/types'
 import { postCompute } from '@/lib/api'
 import type { StateScore } from '@/lib/types'
 
@@ -43,7 +43,7 @@ export const useWeightsStore = create<WeightsStore>()(
         }),
       resetTo: weights => set({ weights }),
     }),
-    { name: 'scfi-weights' }
+    { name: 'sentr-weights' }
   )
 )
 
@@ -87,18 +87,6 @@ export function WeightSliders({ onScoresUpdate }: WeightSlidersProps) {
               Total: {(total * 100).toFixed(0)}% — needs {((1 - total) * 100).toFixed(0)}% more
             </div>
           )}
-
-          <div className="flex gap-2 mb-4 flex-wrap">
-            {(Object.keys(SECTOR_PRESETS) as SectorPresetKey[]).map(key => (
-              <button
-                key={key}
-                className="text-xs px-2 py-1 rounded border border-border-default text-text-secondary hover:text-text-primary hover:border-accent transition-colors"
-                onClick={() => resetTo(SECTOR_PRESETS[key])}
-              >
-                {key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ')}
-              </button>
-            ))}
-          </div>
 
           {DIMENSIONS.map(dim => (
             <div key={dim.key} className="mb-3">

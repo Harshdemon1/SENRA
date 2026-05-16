@@ -1,4 +1,5 @@
 'use client'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import type { StateScore } from '@/lib/types'
@@ -13,6 +14,18 @@ interface ScoreRankingProps {
 
 export function ScoreRanking({ states, isLoading }: ScoreRankingProps) {
   const router = useRouter()
+  const [sortBy, setSortBy] = useState<'alpha' | 'rank'>('alpha')
+
+  const [search, setSearch] = useState('')
+
+  const sorted = useMemo(() => {
+    if (!states) return []
+    const filtered = search.trim()
+      ? states.filter(s => s.state.toLowerCase().includes(search.trim().toLowerCase()))
+      : states
+    if (sortBy === 'alpha') return [...filtered].sort((a, b) => a.state.localeCompare(b.state))
+    return filtered
+  }, [states, sortBy, search])
 
   if (isLoading || !states) {
     return (
@@ -26,12 +39,35 @@ export function ScoreRanking({ states, isLoading }: ScoreRankingProps) {
 
   return (
     <div className="overflow-y-auto flex-1">
-      {states.map((state, i) => (
+      <div className="px-3 py-2 border-b border-border-subtle flex items-center gap-2">
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search states…"
+          className="flex-1 bg-bg-elevated border border-border-default rounded-md px-2 py-1 text-xs text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
+        />
+        <button
+          onClick={() => setSortBy('alpha')}
+          className={`text-xs px-2 py-1 rounded transition-colors flex-shrink-0 ${sortBy === 'alpha' ? 'bg-accent text-bg-void' : 'text-text-secondary hover:text-text-primary border border-border-default'}`}
+        >
+          A–Z
+        </button>
+        <button
+          onClick={() => setSortBy('rank')}
+          className={`text-xs px-2 py-1 rounded transition-colors flex-shrink-0 ${sortBy === 'rank' ? 'bg-accent text-bg-void' : 'text-text-secondary hover:text-text-primary border border-border-default'}`}
+        >
+          Rank
+        </button>
+      </div>
+      {sorted.length === 0 && (
+        <div className="px-4 py-6 text-center text-xs text-text-tertiary">No states match "{search}"</div>
+      )}
+      {sorted.map((state, i) => (
         <motion.div
           key={state.slug}
           initial={{ opacity: 0, x: 16 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: i * 0.025, duration: 0.3 }}
+          transition={{ delay: Math.min(i * 0.015, 0.3), duration: 0.25 }}
           className="flex items-center gap-3 px-4 py-2.5 hover:bg-bg-hover cursor-pointer border-b border-border-subtle transition-colors"
           onClick={() => router.push(`/state/${state.slug}`)}
         >
