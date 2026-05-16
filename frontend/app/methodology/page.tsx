@@ -173,7 +173,7 @@ export default function MethodologyPage() {
 {`@misc{scfi2024,
   title  = {India Supply Chain Fragility Index},
   author = {Harshdemon1},
-  year   = {2024},
+  year   = {2026},
   url    = {https://github.com/Harshdemon1/Palantir},
   note   = {Open source under MIT License. Data from Government of India.}
 }`}

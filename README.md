@@ -174,7 +174,7 @@ The file must have `properties.ST_NM` matching state display names (e.g. `"Tamil
 @misc{scfi2024,
   title  = {India Supply Chain Fragility Index},
   author = {Harshdemon1},
-  year   = {2024},
+  year   = {2026},
   url    = {https://github.com/Harshdemon1/Palantir},
   note   = {Open source under MIT License.}
 }

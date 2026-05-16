@@ -29,18 +29,18 @@ export function SectorToggle() {
           className={clsx(
             'relative text-xs px-3 py-1 rounded-full transition-colors font-medium',
             sector === key
-              ? 'text-bg-void'
-              : 'text-text-secondary hover:text-text-primary border border-border-default'
+              ? 'bg-accent text-bg-void'
+              : 'text-text-secondary hover:text-text-primary border border-border-default hover:border-accent/50'
           )}
         >
           {sector === key && (
             <motion.span
               layoutId="sector-pill"
               className="absolute inset-0 rounded-full bg-accent"
-              style={{ zIndex: -1 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             />
           )}
-          {SECTOR_LABELS[key]}
+          <span className="relative z-10">{SECTOR_LABELS[key]}</span>
         </button>
       ))}
     </div>

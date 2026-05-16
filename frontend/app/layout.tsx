@@ -19,8 +19,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <div className="flex items-center gap-6 text-sm text-text-secondary">
               <Link href="/" className="hover:text-text-primary transition-colors">Dashboard</Link>
-              <Link href="/compare" className="hover:text-text-primary transition-colors">Compare</Link>
               <Link href="/methodology" className="hover:text-text-primary transition-colors">Methodology</Link>
+              <Link href="/compare" className="hover:text-text-primary transition-colors">Compare</Link>
               <a
                 href="https://github.com/Harshdemon1/Palantir"
                 target="_blank"

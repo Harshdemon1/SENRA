@@ -57,7 +57,7 @@ export default function DashboardPage() {
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.4 }}
-          className="bg-bg-base border border-border-default rounded-2xl overflow-hidden"
+          className="relative bg-bg-base border border-border-default rounded-2xl overflow-hidden"
           style={{ minHeight: 520 }}
         >
           {displayStates && (
@@ -70,11 +70,11 @@ export default function DashboardPage() {
           )}
 
           {/* Legend */}
-          <div className="absolute bottom-4 left-4 flex flex-col gap-1.5">
+          <div className="absolute bottom-4 left-4 bg-bg-void/80 backdrop-blur-sm rounded-lg px-3 py-2 flex flex-col gap-1.5">
             {[['CRITICAL', '#C0341D'], ['HIGH', '#CC7A0A'], ['MODERATE', '#AA9700'], ['LOW', '#2A8556']].map(([label, color]) => (
-              <div key={label} className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-sm" style={{ background: color }} />
-                <span className="text-[10px] text-text-secondary numeric">{label}</span>
+              <div key={label} className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: color }} />
+                <span className="text-[10px] text-text-secondary font-medium">{label}</span>
               </div>
             ))}
           </div>
