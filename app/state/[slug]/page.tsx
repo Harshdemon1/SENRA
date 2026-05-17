@@ -4,22 +4,96 @@ import { ScoreBar } from '@/components/ui/ScoreBar'
 import { MetricRadar } from '@/components/dashboard/MetricRadar'
 import { TrendChart } from '@/components/dashboard/TrendChart'
 import { DIMENSIONS } from '@/lib/constants'
-import type { StateProfile } from '@/lib/types'
+import type { StateProfile, Band } from '@/lib/types'
 import Link from 'next/link'
+import { getDb } from '@/lib/db'
+import { seedIfEmpty } from '@/lib/seed'
 
-async function getStateProfile(slug: string): Promise<StateProfile | null> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
+type DbRow = Record<string, unknown>
+
+function getStateProfile(slug: string): StateProfile | null {
   try {
-    const r = await fetch(`${apiUrl}/api/scores/${slug}`, { next: { revalidate: 60 } })
-    if (!r.ok) return null
-    return r.json()
+    seedIfEmpty()
+    const db = getDb()
+    const state = db.prepare('SELECT * FROM states WHERE slug = ?').get(slug) as DbRow | undefined
+    if (!state) return null
+
+    const latestRow = db.prepare(`
+      SELECT computed_at FROM fragility_scores
+      WHERE state_id = ? AND sector_preset = 'default'
+      ORDER BY computed_at DESC LIMIT 1
+    `).get(state.id) as { computed_at: string } | undefined
+    if (!latestRow) return null
+
+    const fs = db.prepare(`
+      SELECT * FROM fragility_scores
+      WHERE state_id = ? AND sector_preset = 'default' AND computed_at = ?
+    `).get(state.id, latestRow.computed_at) as DbRow
+
+    const history = (db.prepare(`
+      SELECT computed_at as date, score, band FROM fragility_scores
+      WHERE state_id = ? AND sector_preset = 'default'
+      ORDER BY computed_at ASC
+    `).all(state.id) as DbRow[]).map(r => ({ date: r.date as string, score: r.score as number, band: r.band as Band }))
+
+    const allScores = db.prepare(`
+      SELECT fs.score, s.slug, s.name, fs.band, fs.rank, fs.confidence,
+             fs.subscore_road, fs.subscore_business, fs.subscore_monsoon,
+             fs.subscore_logistics, fs.subscore_power, fs.subscore_cold_chain,
+             fs.subscore_concentration, fs.imputed_dimensions, s.iso_code, s.region
+      FROM fragility_scores fs
+      JOIN states s ON s.id = fs.state_id
+      WHERE fs.sector_preset = 'default' AND fs.computed_at = ?
+      ORDER BY ABS(fs.score - ?)
+      LIMIT 6
+    `).all(latestRow.computed_at, fs.score) as DbRow[]
+
+    const similar = allScores
+      .filter(r => r.slug !== slug)
+      .slice(0, 3)
+      .map(r => ({
+        state: r.name as string, slug: r.slug as string,
+        iso_code: r.iso_code as string, region: r.region as string,
+        score: r.score as number, rank: r.rank as number,
+        band: r.band as Band, confidence: r.confidence as number,
+        subscores: {
+          road_quality: r.subscore_road as number,
+          business_density: r.subscore_business as number,
+          monsoon_disruption: r.subscore_monsoon as number,
+          logistics_access: r.subscore_logistics as number,
+          power_reliability: r.subscore_power as number,
+          cold_chain_infra: r.subscore_cold_chain as number,
+          market_concentration: r.subscore_concentration as number,
+        },
+        imputed_dims: JSON.parse(r.imputed_dimensions as string ?? '[]'),
+      }))
+
+    return {
+      state: state.name as string, slug: state.slug as string,
+      iso_code: state.iso_code as string, region: state.region as string,
+      score: fs.score as number, rank: fs.rank as number,
+      band: fs.band as Band, confidence: fs.confidence as number,
+      subscores: {
+        road_quality: fs.subscore_road as number,
+        business_density: fs.subscore_business as number,
+        monsoon_disruption: fs.subscore_monsoon as number,
+        logistics_access: fs.subscore_logistics as number,
+        power_reliability: fs.subscore_power as number,
+        cold_chain_infra: fs.subscore_cold_chain as number,
+        market_concentration: fs.subscore_concentration as number,
+      },
+      imputed_dims: JSON.parse(fs.imputed_dimensions as string ?? '[]'),
+      history,
+      similar,
+      raw_values: JSON.parse(state.raw_data as string ?? '{}'),
+    }
   } catch {
     return null
   }
 }
 
-export default async function StatePage({ params }: { params: { slug: string } }) {
-  const profile = await getStateProfile(params.slug)
+export default function StatePage({ params }: { params: { slug: string } }) {
+  const profile = getStateProfile(params.slug)
   if (!profile) notFound()
 
   const worstDims = [...DIMENSIONS]

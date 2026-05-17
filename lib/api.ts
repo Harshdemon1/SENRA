@@ -10,7 +10,7 @@ const fetcher = (url: string) =>
   })
 
 export function useScores(sector = 'default') {
-  return useSWR<ScoresPayload>(`/backend/api/scores?sector=${sector}`, fetcher, {
+  return useSWR<ScoresPayload>(`/api/scores?sector=${sector}`, fetcher, {
     keepPreviousData: true,
     revalidateOnFocus: false,
     dedupingInterval: 30_000,
@@ -18,7 +18,7 @@ export function useScores(sector = 'default') {
 }
 
 export function useStateProfile(slug: string | null) {
-  return useSWR<StateProfile>(slug ? `/backend/api/scores/${slug}` : null, fetcher, {
+  return useSWR<StateProfile>(slug ? `/api/scores/${slug}` : null, fetcher, {
     keepPreviousData: true,
     revalidateOnFocus: false,
   })
@@ -26,7 +26,7 @@ export function useStateProfile(slug: string | null) {
 
 export function useCompare(slugs: string[], sector = 'default') {
   const key = slugs.length >= 2
-    ? `/backend/api/compare?states=${slugs.join(',')}&sector=${sector}`
+    ? `/api/compare?states=${slugs.join(',')}&sector=${sector}`
     : null
   return useSWR<ComparePayload>(key, fetcher, {
     keepPreviousData: true,
@@ -35,14 +35,14 @@ export function useCompare(slugs: string[], sector = 'default') {
 }
 
 export function useMeta() {
-  return useSWR<MetaPayload>('/backend/api/meta', fetcher, {
+  return useSWR<MetaPayload>('/api/meta', fetcher, {
     refreshInterval: 300_000,
     revalidateOnFocus: false,
   })
 }
 
 export async function postCompute(weights: WeightsMap, sector = 'default') {
-  const r = await fetch('/backend/api/compute', {
+  const r = await fetch('/api/compute', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ weights, sector }),
