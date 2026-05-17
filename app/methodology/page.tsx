@@ -74,7 +74,7 @@ export default function MethodologyPage() {
 
       {/* 4. Composite formula */}
       <section className="mb-10">
-        <h2 className="text-lg font-semibold text-text-primary mb-4">4. Composite Score</h2>
+        <h2 className="text-lg font-semibold text-text-primary mb-4">4. Score Formula</h2>
         <div className="bg-bg-surface rounded-xl p-4 font-mono text-xs text-text-primary mb-4">
           fragility_score = Σ (subscore_i × weight_i)  for i in 7 dimensions
         </div>

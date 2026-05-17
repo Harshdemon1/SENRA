@@ -9,12 +9,12 @@ export interface DimensionDef {
 
 export const SCORER_DIMENSIONS: DimensionDef[] = [
   { key: 'road_quality',         label: 'Road Infrastructure',       defaultWeight: 0.22, higherIsWorse: false, unit: 'NH km per 1000 sq km',      description: 'National highway density as proxy for road quality' },
-  { key: 'business_density',     label: 'Distributor Density',       defaultWeight: 0.18, higherIsWorse: false, unit: 'Companies per lakh pop',     description: 'Registered distributor/wholesale businesses per capita' },
-  { key: 'monsoon_disruption',   label: 'Monsoon Disruption Risk',   defaultWeight: 0.18, higherIsWorse: true,  unit: 'Composite index',            description: 'Rainfall volume, variability, and flood frequency' },
-  { key: 'logistics_access',     label: 'Logistics Access (LEADS)',  defaultWeight: 0.16, higherIsWorse: false, unit: 'LEADS score 0-100',          description: 'Government LEADS index: port, warehouse, service quality' },
+  { key: 'business_density',     label: 'Distributor Density',       defaultWeight: 0.18, higherIsWorse: false, unit: 'companies per 100,000',      description: 'Registered distributor/wholesale businesses per capita' },
+  { key: 'monsoon_disruption',   label: 'Monsoon Disruption Risk',   defaultWeight: 0.18, higherIsWorse: true,  unit: '',                           description: 'Rainfall volume, variability, and flood frequency' },
+  { key: 'logistics_access',     label: 'Logistics Access (LEADS)',  defaultWeight: 0.16, higherIsWorse: false, unit: 'LEADS score 0–100',          description: 'Government LEADS index: port, warehouse, service quality' },
   { key: 'power_reliability',    label: 'Power Grid Reliability',    defaultWeight: 0.12, higherIsWorse: true,  unit: 'Annual outage hours',        description: 'Average annual power outage duration per consumer' },
   { key: 'cold_chain_infra',     label: 'Cold Chain Infrastructure', defaultWeight: 0.08, higherIsWorse: false, unit: 'MT capacity per lakh',       description: 'Cold storage capacity relative to population' },
-  { key: 'market_concentration', label: 'Distributor Concentration', defaultWeight: 0.06, higherIsWorse: true,  unit: 'HHI proxy',                 description: 'Market concentration of distributors (higher = riskier)' },
+  { key: 'market_concentration', label: 'Distributor Concentration', defaultWeight: 0.06, higherIsWorse: true,  unit: 'Concentration score',        description: 'Distributor market spread — fewer dominant players means higher disruption risk' },
 ]
 
 export const SCORER_PRESETS: Record<string, Record<string, number>> = {

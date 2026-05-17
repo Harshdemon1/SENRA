@@ -11,6 +11,7 @@ import SenraAppSkeleton from '@/components/ui/SenraAppSkeleton'
 import { MobileBottomSheet } from '@/components/ui/MobileBottomSheet'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import type { StateScore } from '@/lib/types'
+import { BAND_COLORS, BAND_BG_COLORS } from '@/lib/constants'
 
 const IndiaMap = dynamic(
   () => import('@/components/map/IndiaMap').then(m => m.IndiaMap),
@@ -23,9 +24,11 @@ export default function DashboardPage() {
   const { data: meta } = useMeta()
   const [customScores, setCustomScores] = useState<StateScore[] | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
   const isMobile = useMediaQuery('(max-width: 480px)')
 
   const displayStates = customScores ?? data?.states
+  const selectedState = selectedSlug ? displayStates?.find(s => s.slug === selectedSlug) : null
 
   if (isLoading && !data) return <SenraAppSkeleton />
 
@@ -69,7 +72,8 @@ export default function DashboardPage() {
           {displayStates && (
             <IndiaMap
               scores={displayStates}
-              onSelect={isMobile ? () => setSheetOpen(true) : undefined}
+              selectedSlug={selectedSlug ?? undefined}
+              onSelect={isMobile ? (slug) => { setSelectedSlug(slug); setSheetOpen(true) } : undefined}
             />
           )}
           {!displayStates && !error && (
@@ -141,10 +145,31 @@ export default function DashboardPage() {
       {/* Mobile bottom sheet */}
       <AnimatePresence>
         {isMobile && (
-          <MobileBottomSheet isOpen={sheetOpen} onClose={() => setSheetOpen(false)}>
-            <div className="pt-2">
-              <ScoreRanking states={displayStates} isLoading={isLoading && !customScores} />
-            </div>
+          <MobileBottomSheet isOpen={sheetOpen} onClose={() => { setSheetOpen(false); setSelectedSlug(null) }}>
+            {/* Mini-header — visible in collapsed (80px) state */}
+            {selectedState && (
+              <div
+                className="flex items-center justify-between pb-3 mb-3"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+              >
+                <div>
+                  <div className="text-base font-semibold text-text-primary">{selectedState.state}</div>
+                  <div
+                    className="text-xs font-semibold tracking-wider mt-0.5"
+                    style={{ color: BAND_COLORS[selectedState.band] }}
+                  >
+                    {selectedState.band}
+                  </div>
+                </div>
+                <span
+                  className="numeric text-2xl font-bold"
+                  style={{ color: BAND_COLORS[selectedState.band] }}
+                >
+                  {selectedState.score.toFixed(0)}
+                </span>
+              </div>
+            )}
+            <ScoreRanking states={displayStates} isLoading={isLoading && !customScores} />
           </MobileBottomSheet>
         )}
       </AnimatePresence>
