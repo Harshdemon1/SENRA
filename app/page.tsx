@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useScores, useMeta } from '@/lib/api'
@@ -10,8 +10,8 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import SenraAppSkeleton from '@/components/ui/SenraAppSkeleton'
 import { MobileBottomSheet } from '@/components/ui/MobileBottomSheet'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import type { StateScore } from '@/lib/types'
-import { BAND_COLORS, BAND_BG_COLORS } from '@/lib/constants'
+import type { StateScore, Band } from '@/lib/types'
+import { BAND_COLORS, SECTOR_PRESETS } from '@/lib/constants'
 
 const IndiaMap = dynamic(
   () => import('@/components/map/IndiaMap').then(m => m.IndiaMap),
@@ -20,17 +20,43 @@ const IndiaMap = dynamic(
 
 export default function DashboardPage() {
   const { sector } = useSectorStore()
-  const { data, isLoading, error } = useScores(sector)
+  // Always fetch default — it returns all 7 normalized subscores per state.
+  // Sector switching is computed client-side from those subscores so we don't
+  // depend on the DB having pre-seeded rows for every preset.
+  const { data: baseData, isLoading, error } = useScores('default')
   const { data: meta } = useMeta()
   const [customScores, setCustomScores] = useState<StateScore[] | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
   const isMobile = useMediaQuery('(max-width: 480px)')
 
-  const displayStates = customScores ?? data?.states
+  // Recompute scores client-side when sector changes: Σ(subscore_i × weight_i)
+  const sectorStates = useMemo<StateScore[] | undefined>(() => {
+    if (!baseData?.states) return undefined
+    if (sector === 'default') return baseData.states
+
+    const weights = SECTOR_PRESETS[sector]
+    const recomputed = baseData.states.map(state => {
+      const score = Object.entries(weights).reduce((sum, [key, w]) => {
+        const sub = state.subscores[key as keyof typeof state.subscores] ?? 0
+        return sum + sub * w
+      }, 0)
+      const band: Band =
+        score >= 70 ? 'CRITICAL' :
+        score >= 50 ? 'HIGH' :
+        score >= 30 ? 'MODERATE' : 'LOW'
+      return { ...state, score, band }
+    })
+
+    return [...recomputed]
+      .sort((a, b) => b.score - a.score)
+      .map((s, i) => ({ ...s, rank: i + 1 }))
+  }, [baseData, sector])
+
+  const displayStates = customScores ?? sectorStates
   const selectedState = selectedSlug ? displayStates?.find(s => s.slug === selectedSlug) : null
 
-  if (isLoading && !data) return <SenraAppSkeleton />
+  if (isLoading && !baseData) return <SenraAppSkeleton />
 
   return (
     <motion.div
@@ -125,7 +151,7 @@ export default function DashboardPage() {
             <div className="px-4 py-3 border-b border-border-subtle text-xs text-text-tertiary font-medium">
               All States — Ranked by Fragility
             </div>
-            <ScoreRanking states={displayStates} isLoading={isLoading && !customScores} />
+            <ScoreRanking states={displayStates} isLoading={isLoading && !baseData && !customScores} />
           </div>
           <WeightSliders onScoresUpdate={setCustomScores} />
         </motion.div>
@@ -136,7 +162,7 @@ export default function DashboardPage() {
             <div className="px-4 py-3 border-b border-border-subtle text-xs text-text-tertiary font-medium">
               All States — Ranked by Fragility
             </div>
-            <ScoreRanking states={displayStates} isLoading={isLoading && !customScores} />
+            <ScoreRanking states={displayStates} isLoading={isLoading && !baseData && !customScores} />
           </div>
           <WeightSliders onScoresUpdate={setCustomScores} />
         </div>
@@ -169,7 +195,7 @@ export default function DashboardPage() {
                 </span>
               </div>
             )}
-            <ScoreRanking states={displayStates} isLoading={isLoading && !customScores} />
+            <ScoreRanking states={displayStates} isLoading={isLoading && !baseData && !customScores} />
           </MobileBottomSheet>
         )}
       </AnimatePresence>
