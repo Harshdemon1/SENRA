@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/Badge'
 import { ScoreBar } from '@/components/ui/ScoreBar'
