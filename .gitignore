@@ -22,5 +22,15 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Data
-backend/data/*.pdf
+# SQLite database (auto-generated at runtime)
+*.db
+*.db-shm
+*.db-wal
+
+# Build artifacts
+tsconfig.tsbuildinfo
+nextjs.log
+
+# Leftover install directories
+frontend/
+backend/
