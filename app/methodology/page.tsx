@@ -26,7 +26,7 @@ export default function MethodologyPage() {
                 Default weight: <span className="numeric text-text-secondary">{(dim.default_weight * 100).toFixed(0)}%</span>
                 {' · '}
                 Direction: <span className={dim.higher_is_worse ? 'text-critical' : 'text-low'}>
-                  {dim.higher_is_worse ? 'Higher raw = more fragile' : 'Higher raw = less fragile'}
+                  {dim.higher_is_worse ? 'Higher value = higher risk' : 'Higher value = lower risk'}
                 </span>
               </div>
             </div>
@@ -108,7 +108,7 @@ export default function MethodologyPage() {
               <tr className="border-b border-border-subtle text-text-tertiary">
                 <th className="text-left py-2 pr-4">Dimension</th>
                 {(Object.keys(SECTOR_PRESETS) as SectorPresetKey[]).map(k => (
-                  <th key={k} className="text-right py-2 px-2 numeric">{SECTOR_LABELS[k]}</th>
+                  <th key={k} className="text-right py-2 px-2 numeric">{k === 'fmcg' ? 'FMCG (Fast-Moving Consumer Goods)' : SECTOR_LABELS[k]}</th>
                 ))}
               </tr>
             </thead>
@@ -160,7 +160,7 @@ export default function MethodologyPage() {
         <ul className="space-y-2 text-sm text-text-secondary list-disc list-inside">
           <li>Government API resource IDs change periodically; fallback data is used when live fetch fails.</li>
           <li>LEADS index is published annually as a PDF; parsing is approximate.</li>
-          <li>IMD does not offer a clean REST API; rainfall data is updated from known datasets.</li>
+          <li>IMD (India Meteorological Department) does not offer a clean REST API; rainfall data is updated from known datasets.</li>
           <li>All data represents state-level averages — intra-state variation can be significant.</li>
           <li>Historical trend data is only available from the date of first deployment.</li>
         </ul>
@@ -168,7 +168,7 @@ export default function MethodologyPage() {
 
       {/* 9. Citation */}
       <section className="mb-10">
-        <h2 className="text-lg font-semibold text-text-primary mb-4">9. How to Cite</h2>
+        <h2 className="text-lg font-semibold text-text-primary mb-4">9. Citations</h2>
         <div className="bg-bg-surface rounded-xl p-4 font-mono text-xs text-text-primary whitespace-pre-wrap">
 {`@misc{senra2026,
   title  = {SENRA — Supply Chain Risk Intelligence},

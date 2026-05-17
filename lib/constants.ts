@@ -1,13 +1,13 @@
 import type { DimensionDef, SectorPresetKey, WeightsMap } from './types'
 
 export const DIMENSIONS: DimensionDef[] = [
-  { key: 'road_quality',         label: 'Road Infrastructure',       description: 'National highway density as proxy for road quality',                  unit: 'NH km per 1000 sq km',   default_weight: 0.22, higher_is_worse: false },
-  { key: 'business_density',     label: 'Distributor Density',       description: 'Registered distributor/wholesale businesses per capita',               unit: 'companies per 100,000 people', default_weight: 0.18, higher_is_worse: false },
-  { key: 'monsoon_disruption',   label: 'Monsoon Disruption Risk',   description: 'Rainfall volume, variability, and flood frequency',                   unit: 'Composite index',        default_weight: 0.18, higher_is_worse: true  },
-  { key: 'logistics_access',     label: 'Logistics Access (LEADS)',  description: 'Government LEADS index: port, warehouse, service quality',             unit: 'LEADS score 0–100',      default_weight: 0.16, higher_is_worse: false },
-  { key: 'power_reliability',    label: 'Power Grid Reliability',    description: 'Average annual power outage duration per consumer',                   unit: 'Annual outage hours',    default_weight: 0.12, higher_is_worse: true  },
-  { key: 'cold_chain_infra',     label: 'Cold Chain Infrastructure', description: 'Cold storage capacity relative to population',                        unit: 'MT capacity per lakh',   default_weight: 0.08, higher_is_worse: false },
-  { key: 'market_concentration', label: 'Distributor Concentration', description: 'Market concentration of distributors (higher = riskier)',             unit: 'HHI proxy',              default_weight: 0.06, higher_is_worse: true  },
+  { key: 'road_quality',         label: 'Road Infrastructure',       description: 'National highway density as proxy for road quality',                                                                          unit: 'NH km per 1000 sq km',   default_weight: 0.22, higher_is_worse: false },
+  { key: 'business_density',     label: 'Distributor Density',       description: 'Registered distributor/wholesale businesses per capita',                                                                       unit: 'companies per 100,000',  default_weight: 0.18, higher_is_worse: false },
+  { key: 'monsoon_disruption',   label: 'Monsoon Disruption Risk',   description: 'Rainfall volume, variability, and flood frequency',                                                                            unit: '',                       default_weight: 0.18, higher_is_worse: true  },
+  { key: 'logistics_access',     label: 'Logistics Access (LEADS)',  description: 'Government LEADS index: port, warehouse, service quality',                                                                     unit: 'LEADS score 0–100',      default_weight: 0.16, higher_is_worse: false },
+  { key: 'power_reliability',    label: 'Power Grid Reliability',    description: 'Average annual power outage duration per consumer',                                                                            unit: 'Annual outage hours',    default_weight: 0.12, higher_is_worse: true  },
+  { key: 'cold_chain_infra',     label: 'Cold Chain Infrastructure', description: 'Cold storage capacity relative to population',                                                                                 unit: 'MT capacity per lakh',   default_weight: 0.08, higher_is_worse: false },
+  { key: 'market_concentration', label: 'Distributor Concentration', description: 'Distributor market spread — fewer dominant players means higher disruption risk',                                             unit: 'Concentration score',    default_weight: 0.06, higher_is_worse: true  },
 ]
 
 export const DEFAULT_WEIGHTS: WeightsMap = Object.fromEntries(

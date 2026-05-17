@@ -21,13 +21,14 @@ export function SectorToggle() {
   const { sector, setSector } = useSectorStore()
 
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className="senra-preset-pills">
       {SECTORS.map(key => (
         <button
           key={key}
           onClick={() => setSector(key)}
+          title={key === 'fmcg' ? 'Fast-Moving Consumer Goods' : undefined}
           className={clsx(
-            'relative text-xs px-3 py-1 rounded-full transition-colors font-medium',
+            'relative flex-shrink-0 text-xs px-3 py-1 rounded-full transition-colors font-medium',
             sector === key
               ? 'bg-accent text-bg-void'
               : 'text-text-secondary hover:text-text-primary border border-border-default hover:border-accent/50'

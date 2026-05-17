@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Link from 'next/link'
+import { MethodologyLink } from '@/components/ui/MethodologyLink'
 
 export const metadata: Metadata = {
   title: 'SENRA',
@@ -14,12 +15,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <nav className="border-b border-border-subtle bg-bg-base sticky top-0 z-50">
           <div className="max-w-screen-2xl mx-auto px-6 h-12 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3">
-              <span className="text-accent font-display font-semibold tracking-tight">SENRA</span>
+              <span className="senra-wordmark">SENRA</span>
               <span className="text-text-tertiary text-xs hidden sm:block">Supply Chain Risk Intelligence</span>
             </Link>
             <div className="flex items-center gap-2 text-sm text-text-secondary">
               <Link href="/" className="px-3 py-1.5 rounded-full border border-white/20 hover:border-white/50 hover:text-text-primary transition-colors">Dashboard</Link>
-              <Link href="/methodology" className="px-3 py-1.5 rounded-full border border-white/20 hover:border-white/50 hover:text-text-primary transition-colors">Methodology</Link>
+              <MethodologyLink />
               <Link href="/compare" className="px-3 py-1.5 rounded-full border border-white/20 hover:border-white/50 hover:text-text-primary transition-colors">Compare</Link>
               <a
                 href="https://github.com/Harshdemon1/SENRA"

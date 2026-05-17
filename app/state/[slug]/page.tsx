@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/Badge'
 import { ScoreBar } from '@/components/ui/ScoreBar'
 import { MetricRadar } from '@/components/dashboard/MetricRadar'
 import { TrendChart } from '@/components/dashboard/TrendChart'
+import { AnimatedScore } from '@/components/ui/AnimatedScore'
 import { DIMENSIONS } from '@/lib/constants'
 import type { StateProfile, Band } from '@/lib/types'
 import Link from 'next/link'
@@ -116,11 +117,11 @@ export default function StatePage({ params }: { params: { slug: string } }) {
       <div className="flex flex-wrap items-start gap-6 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-semibold text-text-primary">{profile.state}</h1>
+            <h1 className="text-3xl font-semibold text-text-primary senra-state-name">{profile.state}</h1>
             <Badge band={profile.band} />
           </div>
           <div className="flex flex-wrap gap-4 text-sm text-text-secondary">
-            <span className="numeric">Score: <strong className="text-text-primary">{profile.score.toFixed(1)}</strong>/100</span>
+            <span className="numeric">Score: <strong className="text-text-primary senra-score-display"><AnimatedScore value={profile.score} decimals={1} /></strong>/100</span>
             <span className="numeric">Rank: <strong className="text-text-primary">#{profile.rank}</strong> of 36</span>
             <span>Region: {profile.region}</span>
             <span className="numeric">Confidence: {profile.confidence.toFixed(0)}%</span>
@@ -148,7 +149,7 @@ export default function StatePage({ params }: { params: { slug: string } }) {
               className="bg-bg-base border rounded-xl px-3 py-3"
               style={{ borderColor: isWorst ? '#C0341D44' : '#282828' }}
             >
-              <div className="text-[10px] text-text-tertiary mb-2 leading-tight">{dim.label}</div>
+              <div className="text-[10px] text-text-tertiary mb-2 leading-tight senra-dimension-label">{dim.label}</div>
               <div className="numeric text-lg font-medium text-text-primary">{val.toFixed(0)}</div>
               <div className="mt-1.5">
                 <ScoreBar score={val} band={val >= 70 ? 'CRITICAL' : val >= 50 ? 'HIGH' : val >= 30 ? 'MODERATE' : 'LOW'} showLabel={false} />
