@@ -17,7 +17,7 @@ const IndiaMap = dynamic(
 
 export default function DashboardPage() {
   const { sector } = useSectorStore()
-  const { data, isLoading } = useScores(sector)
+  const { data, isLoading, error } = useScores(sector)
   const { data: meta } = useMeta()
   const [customScores, setCustomScores] = useState<StateScore[] | null>(null)
 
@@ -71,9 +71,15 @@ export default function DashboardPage() {
           {displayStates && (
             <IndiaMap scores={displayStates} />
           )}
-          {!displayStates && (
+          {!displayStates && !error && (
             <div className="w-full h-full flex items-center justify-center text-text-tertiary text-sm">
               Loading map…
+            </div>
+          )}
+          {error && (
+            <div className="w-full h-full flex items-center justify-center flex-col gap-2 text-sm">
+              <span className="text-high">Failed to load scores</span>
+              <span className="text-xs text-text-tertiary">{String(error)}</span>
             </div>
           )}
 

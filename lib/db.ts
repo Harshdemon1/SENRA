@@ -1,7 +1,10 @@
 import Database from 'better-sqlite3'
 import path from 'path'
 
-const DB_PATH = path.join(process.cwd(), 'senra.db')
+// Vercel's filesystem is read-only except /tmp; local dev uses project root
+const DB_PATH = process.env.VERCEL
+  ? '/tmp/senra.db'
+  : path.join(process.cwd(), 'senra.db')
 
 declare global {
   // eslint-disable-next-line no-var
@@ -11,7 +14,8 @@ declare global {
 export function getDb(): Database.Database {
   if (!global._senraDb) {
     global._senraDb = new Database(DB_PATH)
-    global._senraDb.pragma('journal_mode = WAL')
+    // WAL not supported on Vercel /tmp; use memory journal in production
+    global._senraDb.pragma(process.env.VERCEL ? 'journal_mode = MEMORY' : 'journal_mode = WAL')
     initSchema(global._senraDb)
   }
   return global._senraDb
