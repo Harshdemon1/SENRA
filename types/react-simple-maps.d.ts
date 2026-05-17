@@ -66,6 +66,7 @@ declare module 'react-simple-maps' {
     children?: ReactNode
   }
 
+  export type { GeoFeature }
   export function ComposableMap(props: ComposableMapProps): JSX.Element
   export function Geographies(props: GeographiesProps): JSX.Element
   export function Geography(props: GeographyProps): JSX.Element

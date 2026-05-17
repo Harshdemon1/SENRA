@@ -3,6 +3,7 @@ import './globals.css'
 import Link from 'next/link'
 import Image from 'next/image'
 import { MethodologyLink } from '@/components/ui/MethodologyLink'
+import { CompareLink } from '@/components/ui/CompareLink'
 
 export const metadata: Metadata = {
   title: 'SENRA',
@@ -24,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="flex items-center gap-2 text-sm text-text-secondary">
               <Link href="/" className="px-3 py-1.5 rounded-full border border-white/20 hover:border-white/50 hover:text-text-primary transition-colors">Dashboard</Link>
               <MethodologyLink />
-              <Link href="/compare" className="px-3 py-1.5 rounded-full border border-white/20 hover:border-white/50 hover:text-text-primary transition-colors">Compare</Link>
+              <CompareLink />
               <a
                 href="https://github.com/Harshdemon1/SENRA"
                 target="_blank"

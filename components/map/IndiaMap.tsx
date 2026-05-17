@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, memo, useMemo, useState } from 'react'
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps'
 import { useRouter } from 'next/navigation'
 import type { StateScore } from '@/lib/types'
@@ -7,6 +7,7 @@ import { STATE_NAME_TO_SLUG } from '@/lib/constants'
 import { getRiskColor, getLighterRiskColor } from '@/lib/riskColors'
 import { StateTooltip } from './StateTooltip'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
+import type { GeoFeature } from 'react-simple-maps'
 
 const GEO_URL = 'https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson'
 
@@ -15,6 +16,57 @@ interface IndiaMapProps {
   selectedSlug?: string
   onSelect?: (slug: string) => void
 }
+
+interface StateGeoProps {
+  geo: GeoFeature
+  stateData: StateScore | undefined
+  slug: string | undefined
+  isSelected: boolean
+  onHover: (stateData: StateScore, x: number, y: number) => void
+  onLeave: () => void
+  onClickSlug: (slug: string) => void
+}
+
+// Memoised per-state polygon — only re-renders when score/selection actually changes,
+// not when zoom state changes, preventing the 36-polygon cascade re-render on every zoom.
+const StateGeography = memo(function StateGeography({
+  geo, stateData, slug, isSelected, onHover, onLeave, onClickSlug,
+}: StateGeoProps) {
+  const score = stateData?.score ?? null
+  const fill = getRiskColor(score)
+  const hoverFill = score !== null ? getLighterRiskColor(score) : '#2a2a2a'
+
+  const handleEnter = useCallback((e: React.MouseEvent) => {
+    if (stateData) onHover(stateData, e.clientX, e.clientY)
+  }, [stateData, onHover])
+
+  const handleClick = useCallback(() => {
+    if (slug) onClickSlug(slug)
+  }, [slug, onClickSlug])
+
+  return (
+    <Geography
+      geography={geo}
+      fill={fill}
+      stroke="#070707"
+      strokeWidth={0.5}
+      style={{
+        default: {
+          outline: 'none',
+          cursor: slug ? 'pointer' : 'default',
+          opacity: isSelected ? 1 : 0.9,
+          transition: 'fill 0.2s ease, opacity 0.2s ease',
+        },
+        hover: { outline: 'none', opacity: 1, fill: hoverFill },
+        pressed: { outline: 'none', opacity: 0.85 },
+      }}
+      onMouseEnter={handleEnter}
+      onMouseMove={handleEnter}
+      onMouseLeave={onLeave}
+      onClick={handleClick}
+    />
+  )
+})
 
 function MapSkeleton() {
   return (
@@ -58,7 +110,7 @@ export function IndiaMap({ scores, selectedSlug, onSelect }: IndiaMapProps) {
     [scores]
   )
 
-  const handleClick = useCallback(
+  const handleClickSlug = useCallback(
     (slug: string) => {
       if (onSelect) onSelect(slug)
       else router.push(`/state/${slug}`)
@@ -66,12 +118,18 @@ export function IndiaMap({ scores, selectedSlug, onSelect }: IndiaMapProps) {
     [onSelect, router]
   )
 
+  const handleHover = useCallback((stateData: StateScore, x: number, y: number) => {
+    setTooltip({ state: stateData, x, y })
+  }, [])
+
+  const handleLeave = useCallback(() => setTooltip(null), [])
+
   if (mapLoading) return <MapSkeleton />
 
   return (
     <div
       className="relative w-full h-full"
-      style={{ opacity: mapVisible ? 1 : 0, transition: 'opacity 0.5s ease' }}
+      style={{ opacity: mapVisible ? 1 : 0, transition: 'opacity 0.5s ease', willChange: 'transform' }}
     >
       <svg width="0" height="0">
         <defs>
@@ -97,42 +155,18 @@ export function IndiaMap({ scores, selectedSlug, onSelect }: IndiaMapProps) {
             {({ geographies }) =>
               geographies.map(geo => {
                 const name = geo.properties.ST_NM || geo.properties.NAME_1 || geo.properties.name
-                const slug = name ? STATE_NAME_TO_SLUG[name] : undefined
+                const slug = name ? STATE_NAME_TO_SLUG[name as string] : undefined
                 const stateData = slug ? scoreMap.get(slug) : undefined
-                const score = stateData?.score ?? null
-                const fill = getRiskColor(score)
-                const hoverFill = score !== null ? getLighterRiskColor(score) : '#2a2a2a'
-                const isSelected = slug === selectedSlug
-
                 return (
-                  <Geography
+                  <StateGeography
                     key={geo.rsmKey}
-                    geography={geo}
-                    fill={fill}
-                    stroke="#070707"
-                    strokeWidth={0.5}
-                    style={{
-                      default: {
-                        outline: 'none',
-                        cursor: slug ? 'pointer' : 'default',
-                        opacity: isSelected ? 1 : 0.9,
-                        transition: 'fill 0.2s ease, opacity 0.2s ease',
-                      },
-                      hover: {
-                        outline: 'none',
-                        opacity: 1,
-                        fill: hoverFill,
-                      },
-                      pressed: { outline: 'none', opacity: 0.85 },
-                    }}
-                    onMouseEnter={(e: React.MouseEvent) => {
-                      if (stateData) setTooltip({ state: stateData, x: e.clientX, y: e.clientY })
-                    }}
-                    onMouseMove={(e: React.MouseEvent) => {
-                      if (stateData) setTooltip({ state: stateData, x: e.clientX, y: e.clientY })
-                    }}
-                    onMouseLeave={() => setTooltip(null)}
-                    onClick={() => slug && handleClick(slug)}
+                    geo={geo}
+                    stateData={stateData}
+                    slug={slug}
+                    isSelected={slug === selectedSlug}
+                    onHover={handleHover}
+                    onLeave={handleLeave}
+                    onClickSlug={handleClickSlug}
                   />
                 )
               })
