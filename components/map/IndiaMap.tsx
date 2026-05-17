@@ -1,11 +1,10 @@
 'use client'
-import { useCallback, useEffect, memo, useMemo, useState } from 'react'
+import { useCallback, useEffect, memo, useMemo, useRef, useState } from 'react'
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps'
 import { useRouter } from 'next/navigation'
 import type { StateScore } from '@/lib/types'
-import { STATE_NAME_TO_SLUG } from '@/lib/constants'
+import { STATE_NAME_TO_SLUG, BAND_COLORS } from '@/lib/constants'
 import { getRiskColor, getLighterRiskColor } from '@/lib/riskColors'
-import { StateTooltip } from './StateTooltip'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import type { GeoFeature } from 'react-simple-maps'
 
@@ -17,28 +16,28 @@ interface IndiaMapProps {
   onSelect?: (slug: string) => void
 }
 
+// ─── per-polygon props ────────────────────────────────────────────────────────
 interface StateGeoProps {
   geo: GeoFeature
   stateData: StateScore | undefined
   slug: string | undefined
   isSelected: boolean
-  onHover: (stateData: StateScore, x: number, y: number) => void
+  // x/y captured at mouse-enter; no onMouseMove → eliminates 60fps re-renders
+  onEnter: (stateData: StateScore, x: number, y: number) => void
   onLeave: () => void
   onClickSlug: (slug: string) => void
 }
 
-// Memoised per-state polygon — only re-renders when score/selection actually changes,
-// not when zoom state changes, preventing the 36-polygon cascade re-render on every zoom.
 const StateGeography = memo(function StateGeography({
-  geo, stateData, slug, isSelected, onHover, onLeave, onClickSlug,
+  geo, stateData, slug, isSelected, onEnter, onLeave, onClickSlug,
 }: StateGeoProps) {
   const score = stateData?.score ?? null
   const fill = getRiskColor(score)
   const hoverFill = score !== null ? getLighterRiskColor(score) : '#2a2a2a'
 
   const handleEnter = useCallback((e: React.MouseEvent) => {
-    if (stateData) onHover(stateData, e.clientX, e.clientY)
-  }, [stateData, onHover])
+    if (stateData) onEnter(stateData, e.clientX, e.clientY)
+  }, [stateData, onEnter])
 
   const handleClick = useCallback(() => {
     if (slug) onClickSlug(slug)
@@ -57,17 +56,56 @@ const StateGeography = memo(function StateGeography({
           opacity: isSelected ? 1 : 0.9,
           transition: 'fill 0.2s ease, opacity 0.2s ease',
         },
-        hover: { outline: 'none', opacity: 1, fill: hoverFill },
+        hover:   { outline: 'none', opacity: 1, fill: hoverFill },
         pressed: { outline: 'none', opacity: 0.85 },
       }}
       onMouseEnter={handleEnter}
-      onMouseMove={handleEnter}
+      // No onMouseMove — position updates happen via window listener without triggering React
       onMouseLeave={onLeave}
       onClick={handleClick}
     />
   )
 })
 
+// ─── memoised geography list ──────────────────────────────────────────────────
+// Lives in its own component so that tooltip/zoom state changes inside IndiaMap
+// don't cause this subtree to re-render.
+interface GeoListProps {
+  geographies: GeoFeature[]
+  scoreMap: Map<string, StateScore>
+  selectedSlug: string | undefined
+  onEnter: (stateData: StateScore, x: number, y: number) => void
+  onLeave: () => void
+  onClickSlug: (slug: string) => void
+}
+
+const GeoList = memo(function GeoList({
+  geographies, scoreMap, selectedSlug, onEnter, onLeave, onClickSlug,
+}: GeoListProps) {
+  return (
+    <>
+      {geographies.map(geo => {
+        const name = geo.properties.ST_NM || geo.properties.NAME_1 || geo.properties.name
+        const slug = name ? STATE_NAME_TO_SLUG[name as string] : undefined
+        const stateData = slug ? scoreMap.get(slug) : undefined
+        return (
+          <StateGeography
+            key={geo.rsmKey}
+            geo={geo}
+            stateData={stateData}
+            slug={slug}
+            isSelected={slug === selectedSlug}
+            onEnter={onEnter}
+            onLeave={onLeave}
+            onClickSlug={onClickSlug}
+          />
+        )
+      })}
+    </>
+  )
+})
+
+// ─── skeleton ────────────────────────────────────────────────────────────────
 function MapSkeleton() {
   return (
     <div className="relative w-full h-full flex items-center justify-center bg-bg-base rounded-xl overflow-hidden">
@@ -85,11 +123,23 @@ function MapSkeleton() {
   )
 }
 
-export function IndiaMap({ scores, selectedSlug, onSelect }: IndiaMapProps) {
+// ─── main component ───────────────────────────────────────────────────────────
+// Wrapped in memo so that parent state changes (selectedSlug sidebar, sheet open,
+// customScores) don't cascade into the map unless scores/selectedSlug/onSelect
+// actually changed.
+export const IndiaMap = memo(function IndiaMap({ scores, selectedSlug, onSelect }: IndiaMapProps) {
   const router = useRouter()
   const isMobile = useMediaQuery('(max-width: 480px)')
-  const [tooltip, setTooltip] = useState<{ state: StateScore; x: number; y: number } | null>(null)
+
+  // Tooltip: content in state (fires only on polygon boundary cross ≈ rare),
+  // position in ref (direct DOM mutation — zero React renders per mousemove frame).
+  const [tooltipData, setTooltipData] = useState<StateScore | null>(null)
+  const tooltipRef = useRef<HTMLDivElement>(null)
+
   const [geoData, setGeoData] = useState<object | null>(null)
+  // Cache the parsed geographies array so GeoList's memo stays effective
+  // even when Geographies re-calls its children due to IndiaMap re-renders.
+  const cachedGeosRef = useRef<GeoFeature[] | null>(null)
   const [mapLoading, setMapLoading] = useState(true)
   const [mapVisible, setMapVisible] = useState(false)
   const [zoom, setZoom] = useState(1)
@@ -105,6 +155,19 @@ export function IndiaMap({ scores, selectedSlug, onSelect }: IndiaMapProps) {
       .catch(() => setMapLoading(false))
   }, [])
 
+  // Tooltip position: one passive window listener, direct style mutation.
+  // This replaces the previous onMouseMove → setTooltip({x,y}) pattern that
+  // was firing setTooltip at 60fps and causing a full IndiaMap re-render each frame.
+  useEffect(() => {
+    const move = (e: MouseEvent) => {
+      if (!tooltipRef.current) return
+      tooltipRef.current.style.left = `${e.clientX + 14}px`
+      tooltipRef.current.style.top  = `${e.clientY - 10}px`
+    }
+    window.addEventListener('mousemove', move, { passive: true })
+    return () => window.removeEventListener('mousemove', move)
+  }, []) // stable — registered once, never re-registered
+
   const scoreMap = useMemo(
     () => new Map(scores.map(s => [s.slug, s])),
     [scores]
@@ -118,18 +181,23 @@ export function IndiaMap({ scores, selectedSlug, onSelect }: IndiaMapProps) {
     [onSelect, router]
   )
 
-  const handleHover = useCallback((stateData: StateScore, x: number, y: number) => {
-    setTooltip({ state: stateData, x, y })
+  // Capture initial position at enter so tooltip doesn't flash at 0,0
+  const handleEnter = useCallback((stateData: StateScore, x: number, y: number) => {
+    if (tooltipRef.current) {
+      tooltipRef.current.style.left = `${x + 14}px`
+      tooltipRef.current.style.top  = `${y - 10}px`
+    }
+    setTooltipData(stateData)
   }, [])
 
-  const handleLeave = useCallback(() => setTooltip(null), [])
+  const handleLeave = useCallback(() => setTooltipData(null), [])
 
   if (mapLoading) return <MapSkeleton />
 
   return (
     <div
       className="relative w-full h-full"
-      style={{ opacity: mapVisible ? 1 : 0, transition: 'opacity 0.5s ease', willChange: 'transform' }}
+      style={{ opacity: mapVisible ? 1 : 0, transition: 'opacity 0.5s ease' }}
     >
       <svg width="0" height="0">
         <defs>
@@ -139,10 +207,12 @@ export function IndiaMap({ scores, selectedSlug, onSelect }: IndiaMapProps) {
         </defs>
       </svg>
 
+      {/* will-change on the SVG (not outer div) so the GPU layer covers the element being transformed */}
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{ center: [82, 22], scale: 1000 }}
         className="w-full h-full"
+        style={{ willChange: 'transform', outline: 'none' }}
       >
         <ZoomableGroup
           zoom={isMobile ? zoom * 1.4 : zoom}
@@ -152,32 +222,67 @@ export function IndiaMap({ scores, selectedSlug, onSelect }: IndiaMapProps) {
           onMoveEnd={({ zoom: z }) => setZoom(isMobile ? z / 1.4 : z)}
         >
           <Geographies geography={geoData ?? GEO_URL}>
-            {({ geographies }) =>
-              geographies.map(geo => {
-                const name = geo.properties.ST_NM || geo.properties.NAME_1 || geo.properties.name
-                const slug = name ? STATE_NAME_TO_SLUG[name as string] : undefined
-                const stateData = slug ? scoreMap.get(slug) : undefined
-                return (
-                  <StateGeography
-                    key={geo.rsmKey}
-                    geo={geo}
-                    stateData={stateData}
-                    slug={slug}
-                    isSelected={slug === selectedSlug}
-                    onHover={handleHover}
-                    onLeave={handleLeave}
-                    onClickSlug={handleClickSlug}
-                  />
-                )
-              })
-            }
+            {({ geographies }) => {
+              // Cache on first delivery — keeps GeoList's memo reference stable
+              // across IndiaMap re-renders triggered by tooltip/zoom state.
+              if (!cachedGeosRef.current && geographies.length > 0) {
+                cachedGeosRef.current = geographies
+              }
+              return (
+                <GeoList
+                  geographies={cachedGeosRef.current ?? geographies}
+                  scoreMap={scoreMap}
+                  selectedSlug={selectedSlug}
+                  onEnter={handleEnter}
+                  onLeave={handleLeave}
+                  onClickSlug={handleClickSlug}
+                />
+              )
+            }}
           </Geographies>
         </ZoomableGroup>
       </ComposableMap>
 
-      {tooltip && (
-        <StateTooltip state={tooltip.state} x={tooltip.x} y={tooltip.y} />
-      )}
+      {/* Tooltip: React controls visibility + content; DOM controls position */}
+      <div
+        ref={tooltipRef}
+        className="fixed pointer-events-none z-50"
+        style={{ display: tooltipData ? 'block' : 'none' }}
+      >
+        {tooltipData && (
+          <div className="bg-bg-elevated border border-border-default rounded-xl p-3 shadow-2xl w-48">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-text-primary truncate pr-2">
+                {tooltipData.state}
+              </span>
+              <span
+                className="text-[10px] font-bold px-1.5 py-0.5 rounded border flex-shrink-0"
+                style={{
+                  color: BAND_COLORS[tooltipData.band],
+                  borderColor: `${BAND_COLORS[tooltipData.band]}55`,
+                }}
+              >
+                {tooltipData.band}
+              </span>
+            </div>
+            <div className="flex items-baseline gap-1 mb-1">
+              <span className="numeric text-2xl font-medium text-text-primary">
+                {tooltipData.score.toFixed(0)}
+              </span>
+              <span className="text-xs text-text-secondary">/100</span>
+            </div>
+            <div className="flex justify-between text-xs text-text-tertiary">
+              <span>Rank #{tooltipData.rank}</span>
+              <span>{tooltipData.confidence.toFixed(0)}% conf.</span>
+            </div>
+            {tooltipData.confidence < 60 && (
+              <div className="mt-2 text-[10px] text-high border border-high/30 rounded px-1.5 py-0.5">
+                Low confidence — some data estimated
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Mobile zoom controls */}
       {isMobile && (
@@ -196,4 +301,4 @@ export function IndiaMap({ scores, selectedSlug, onSelect }: IndiaMapProps) {
       )}
     </div>
   )
-}
+})

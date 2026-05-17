@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useScores, useMeta } from '@/lib/api'
@@ -53,6 +53,11 @@ export default function DashboardPage() {
       .map((s, i) => ({ ...s, rank: i + 1 }))
   }, [baseData, sector])
 
+  const handleMapSelect = useCallback((slug: string) => {
+    setSelectedSlug(slug)
+    setSheetOpen(true)
+  }, [])
+
   const displayStates = customScores ?? sectorStates
   const selectedState = selectedSlug ? displayStates?.find(s => s.slug === selectedSlug) : null
 
@@ -99,7 +104,7 @@ export default function DashboardPage() {
             <IndiaMap
               scores={displayStates}
               selectedSlug={selectedSlug ?? undefined}
-              onSelect={isMobile ? (slug) => { setSelectedSlug(slug); setSheetOpen(true) } : undefined}
+              onSelect={isMobile ? handleMapSelect : undefined}
             />
           )}
           {!displayStates && !error && (
