@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Link from 'next/link'
+import Image from 'next/image'
 import { MethodologyLink } from '@/components/ui/MethodologyLink'
 
 export const metadata: Metadata = {
   title: 'SENRA',
   description: 'Algorithmically derived ranking of retail supply chain fragility across 36 Indian states and UTs.',
+  icons: { icon: '/favicon.png' },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -15,6 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <nav className="border-b border-border-subtle bg-bg-base sticky top-0 z-50">
           <div className="max-w-screen-2xl mx-auto px-6 h-12 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3">
+              <Image src="/logo.png" alt="SENRA" height={32} width={32} className="rounded-sm" priority />
               <span className="senra-wordmark">SENRA</span>
               <span className="text-text-tertiary text-xs hidden sm:block">Supply Chain Risk Intelligence</span>
             </Link>
