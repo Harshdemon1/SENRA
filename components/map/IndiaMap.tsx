@@ -6,7 +6,7 @@ import type { StateScore } from '@/lib/types'
 import { BAND_COLORS, STATE_NAME_TO_SLUG } from '@/lib/constants'
 import { StateTooltip } from './StateTooltip'
 
-const GEO_URL = '/india-states.json'
+const GEO_URL = 'https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson'
 
 function getStateColor(score: number | null): string {
   if (score === null) return '#1A1A1A'
