@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps'
 import { useRouter } from 'next/navigation'
 import type { StateScore } from '@/lib/types'
@@ -22,9 +22,35 @@ interface IndiaMapProps {
   onSelect?: (slug: string) => void
 }
 
+function MapSkeleton() {
+  return (
+    <div className="relative w-full h-full flex items-center justify-center bg-bg-base rounded-xl overflow-hidden">
+      <div className="absolute inset-0 animate-pulse">
+        <div className="w-full h-full bg-gradient-to-br from-bg-elevated/60 to-bg-base/40 rounded-xl" />
+      </div>
+      <div className="relative flex flex-col items-center gap-3 z-10">
+        <svg className="animate-spin w-8 h-8 text-accent/60" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+        </svg>
+        <span className="text-xs text-text-tertiary tracking-wide">Loading map…</span>
+      </div>
+    </div>
+  )
+}
+
 export function IndiaMap({ scores, selectedSlug, onSelect }: IndiaMapProps) {
   const router = useRouter()
   const [tooltip, setTooltip] = useState<{ state: StateScore; x: number; y: number } | null>(null)
+  const [geoData, setGeoData] = useState<object | null>(null)
+  const [mapLoading, setMapLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(GEO_URL)
+      .then(r => r.json())
+      .then(data => { setGeoData(data); setMapLoading(false) })
+      .catch(() => setMapLoading(false))
+  }, [])
 
   const scoreMap = useMemo(
     () => new Map(scores.map(s => [s.slug, s])),
@@ -38,6 +64,8 @@ export function IndiaMap({ scores, selectedSlug, onSelect }: IndiaMapProps) {
     },
     [onSelect, router]
   )
+
+  if (mapLoading) return <MapSkeleton />
 
   return (
     <div className="relative w-full h-full">
@@ -54,7 +82,7 @@ export function IndiaMap({ scores, selectedSlug, onSelect }: IndiaMapProps) {
         projectionConfig={{ center: [82, 22], scale: 1000 }}
         className="w-full h-full"
       >
-        <Geographies geography={GEO_URL}>
+        <Geographies geography={geoData ?? GEO_URL}>
           {({ geographies }) =>
             geographies.map(geo => {
               const name = geo.properties.ST_NM || geo.properties.NAME_1 || geo.properties.name
