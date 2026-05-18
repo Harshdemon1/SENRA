@@ -17,7 +17,7 @@ export const useSectorStore = create<SectorStore>(set => ({
 
 const SECTORS = Object.keys(SECTOR_LABELS) as SectorPresetKey[]
 
-export function SectorToggle() {
+export function SectorToggle({ onSelect }: { onSelect?: (s: string) => void } = {}) {
   const { sector, setSector } = useSectorStore()
 
   return (
@@ -25,7 +25,7 @@ export function SectorToggle() {
       {SECTORS.map(key => (
         <button
           key={key}
-          onClick={() => setSector(key)}
+          onClick={() => { setSector(key); onSelect?.(key) }}
           title={key === 'fmcg' ? 'Fast-Moving Consumer Goods' : undefined}
           className={clsx(
             'relative flex-shrink-0 text-xs px-3 py-1 rounded-full transition-colors font-medium',

@@ -1,17 +1,18 @@
 'use client'
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useScores, useMeta } from '@/lib/api'
 import { ScoreRanking } from '@/components/dashboard/ScoreRanking'
 import { WeightSliders } from '@/components/dashboard/WeightSliders'
-import { SectorToggle, useSectorStore } from '@/components/dashboard/SectorToggle'
+import { SectorToggle } from '@/components/dashboard/SectorToggle'
 import { Skeleton } from '@/components/ui/Skeleton'
 import SenraAppSkeleton from '@/components/ui/SenraAppSkeleton'
 import { MobileBottomSheet } from '@/components/ui/MobileBottomSheet'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import type { StateScore, Band } from '@/lib/types'
-import { BAND_COLORS, SECTOR_PRESETS } from '@/lib/constants'
+import { BAND_COLORS } from '@/lib/constants'
+import { SECTOR_WEIGHTS } from '@/lib/sectorWeights'
 import { AboutDataFooter } from '@/components/ui/AboutDataFooter'
 import { exportScoresCsv } from '@/lib/exportCsv'
 import { YearSelector } from '@/components/dashboard/YearSelector'
@@ -24,10 +25,7 @@ const IndiaMap = dynamic(
 )
 
 export default function DashboardPage() {
-  const { sector } = useSectorStore()
-  // Always fetch default — it returns all 7 normalized subscores per state.
-  // Sector switching is computed client-side from those subscores so we don't
-  // depend on the DB having pre-seeded rows for every preset.
+  const [activeSector, setActiveSector] = useState<string>('default')
   const { data: baseData, isLoading, error } = useScores('default')
   const { data: meta } = useMeta()
   const [customScores, setCustomScores] = useState<StateScore[] | null>(null)
@@ -36,28 +34,32 @@ export default function DashboardPage() {
   const [selectedYear, setSelectedYear] = useState<number>(2024)
   const isMobile = useMediaQuery('(max-width: 480px)')
 
+  // Clear custom slider scores when sector button is clicked so sector weights take effect
+  useEffect(() => { setCustomScores(null) }, [activeSector])
+
   // Recompute scores client-side when sector changes: Σ(subscore_i × weight_i)
   const sectorStates = useMemo<StateScore[] | undefined>(() => {
     if (!baseData?.states) return undefined
-    if (sector === 'default') return baseData.states
-
-    const weights = SECTOR_PRESETS[sector]
+    const weights = SECTOR_WEIGHTS[activeSector] ?? SECTOR_WEIGHTS.default
     const recomputed = baseData.states.map(state => {
-      const score = Object.entries(weights).reduce((sum, [key, w]) => {
-        const sub = state.subscores[key as keyof typeof state.subscores] ?? 0
-        return sum + sub * w
-      }, 0)
+      const score =
+        (state.subscores.road_quality         ?? 0) * weights.road_quality +
+        (state.subscores.business_density      ?? 0) * weights.business_density +
+        (state.subscores.monsoon_disruption    ?? 0) * weights.monsoon_disruption +
+        (state.subscores.logistics_access      ?? 0) * weights.logistics_access +
+        (state.subscores.power_reliability     ?? 0) * weights.power_reliability +
+        (state.subscores.cold_chain_infra      ?? 0) * weights.cold_chain_infra +
+        (state.subscores.market_concentration  ?? 0) * weights.market_concentration
       const band: Band =
         score >= 70 ? 'CRITICAL' :
         score >= 50 ? 'HIGH' :
         score >= 30 ? 'MODERATE' : 'LOW'
       return { ...state, score, band }
     })
-
     return [...recomputed]
       .sort((a, b) => b.score - a.score)
       .map((s, i) => ({ ...s, rank: i + 1 }))
-  }, [baseData, sector])
+  }, [baseData, activeSector])
 
   const handleMapSelect = useCallback((slug: string) => {
     setSelectedSlug(slug)
@@ -102,10 +104,10 @@ export default function DashboardPage() {
         </div>
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-2">
-            <SectorToggle />
+            <SectorToggle onSelect={setActiveSector} />
             {displayStates && (
               <button
-                onClick={() => exportScoresCsv(displayStates, sector)}
+                onClick={() => exportScoresCsv(displayStates, activeSector)}
                 className="text-xs px-3 py-1.5 rounded-full border border-white/20 hover:border-white/50 hover:text-text-primary text-text-secondary transition-colors hidden sm:block"
                 title="Export all states as CSV"
               >
