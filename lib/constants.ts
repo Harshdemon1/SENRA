@@ -16,11 +16,11 @@ export const DEFAULT_WEIGHTS: WeightsMap = Object.fromEntries(
 
 export const SECTOR_PRESETS: Record<SectorPresetKey, WeightsMap> = {
   default: {    road_quality: 0.22, business_density: 0.18, monsoon_disruption: 0.18, logistics_access: 0.16, power_reliability: 0.12, cold_chain_infra: 0.08, market_concentration: 0.06 },
-  fmcg: {       road_quality: 0.28, business_density: 0.26, monsoon_disruption: 0.15, logistics_access: 0.13, power_reliability: 0.07, cold_chain_infra: 0.05, market_concentration: 0.06 },
-  pharma: {     road_quality: 0.14, business_density: 0.10, monsoon_disruption: 0.12, logistics_access: 0.20, power_reliability: 0.20, cold_chain_infra: 0.20, market_concentration: 0.04 },
-  cold_chain: { road_quality: 0.13, business_density: 0.08, monsoon_disruption: 0.13, logistics_access: 0.16, power_reliability: 0.24, cold_chain_infra: 0.22, market_concentration: 0.04 },
-  ecommerce: {  road_quality: 0.22, business_density: 0.30, monsoon_disruption: 0.16, logistics_access: 0.14, power_reliability: 0.09, cold_chain_infra: 0.03, market_concentration: 0.06 },
-  agriculture: { road_quality: 0.18, business_density: 0.10, monsoon_disruption: 0.30, logistics_access: 0.14, power_reliability: 0.10, cold_chain_infra: 0.14, market_concentration: 0.04 },
+  fmcg: {       road_quality: 0.20, business_density: 0.22, monsoon_disruption: 0.15, logistics_access: 0.18, power_reliability: 0.10, cold_chain_infra: 0.08, market_concentration: 0.07 },
+  pharma: {     road_quality: 0.18, business_density: 0.20, monsoon_disruption: 0.15, logistics_access: 0.20, power_reliability: 0.15, cold_chain_infra: 0.08, market_concentration: 0.04 },
+  cold_chain: { road_quality: 0.15, business_density: 0.12, monsoon_disruption: 0.20, logistics_access: 0.18, power_reliability: 0.20, cold_chain_infra: 0.12, market_concentration: 0.03 },
+  ecommerce: {  road_quality: 0.25, business_density: 0.20, monsoon_disruption: 0.12, logistics_access: 0.22, power_reliability: 0.10, cold_chain_infra: 0.06, market_concentration: 0.05 },
+  agriculture: { road_quality: 0.20, business_density: 0.15, monsoon_disruption: 0.25, logistics_access: 0.12, power_reliability: 0.10, cold_chain_infra: 0.13, market_concentration: 0.05 },
 }
 
 export const SECTOR_LABELS: Record<SectorPresetKey, string> = {
