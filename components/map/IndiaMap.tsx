@@ -108,7 +108,7 @@ const GeoList = memo(function GeoList({
 // ─── skeleton ────────────────────────────────────────────────────────────────
 function MapSkeleton() {
   return (
-    <div className="relative w-full h-full flex items-center justify-center bg-bg-base rounded-xl overflow-hidden">
+    <div className="absolute inset-0 flex items-center justify-center bg-bg-base rounded-xl overflow-hidden">
       <div className="absolute inset-0 animate-pulse">
         <div className="w-full h-full bg-gradient-to-br from-bg-elevated/60 to-bg-base/40 rounded-xl" />
       </div>
@@ -196,7 +196,7 @@ export const IndiaMap = memo(function IndiaMap({ scores, selectedSlug, onSelect 
 
   return (
     <div
-      className="relative w-full h-full"
+      className="absolute inset-0 w-full"
       style={{ opacity: mapVisible ? 1 : 0, transition: 'opacity 0.5s ease' }}
     >
       <svg width="0" height="0">
