@@ -8,7 +8,7 @@ import { getRiskColor, getLighterRiskColor } from '@/lib/riskColors'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import type { GeoFeature } from 'react-simple-maps'
 
-const GEO_URL = 'https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson'
+const GEO_URL = 'https://raw.githubusercontent.com/datta07/INDIAN-SHAPEFILES/master/INDIA/INDIA_STATES.geojson'
 
 interface IndiaMapProps {
   scores: StateScore[]
@@ -85,7 +85,7 @@ const GeoList = memo(function GeoList({
   return (
     <>
       {geographies.map(geo => {
-        const name = geo.properties.ST_NM || geo.properties.NAME_1 || geo.properties.name
+        const name = geo.properties.STNAME_SH || geo.properties.ST_NM || geo.properties.NAME_1 || geo.properties.name
         const slug = name ? STATE_NAME_TO_SLUG[name as string] : undefined
         const stateData = slug ? scoreMap.get(slug) : undefined
         return (

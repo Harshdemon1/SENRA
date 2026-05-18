@@ -86,6 +86,9 @@ export const STATE_NAME_TO_SLUG: Record<string, string> = {
   'Ladakh': 'ladakh',
   'Lakshadweep': 'lakshadweep',
   'Puducherry': 'puducherry',
+  'Andaman & Nicobar': 'andaman-and-nicobar-islands',
+  'Dadra & Nagar Haveli': 'dadra-and-nagar-haveli-and-daman-and-diu',
+  'Daman & Diu': 'dadra-and-nagar-haveli-and-daman-and-diu',
 }
 
 export const SLUG_TO_STATE_NAME: Record<string, string> = Object.fromEntries(
