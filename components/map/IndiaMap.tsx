@@ -8,7 +8,7 @@ import { getRiskColor, getLighterRiskColor } from '@/lib/riskColors'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import type { GeoFeature } from 'react-simple-maps'
 
-const GEO_URL = 'https://raw.githubusercontent.com/datta07/INDIAN-SHAPEFILES/master/INDIA/INDIA_STATES.geojson'
+const GEO_URL = 'https://raw.githubusercontent.com/datameet/maps/master/States/Admin2.geojson'
 
 interface IndiaMapProps {
   scores: StateScore[]
