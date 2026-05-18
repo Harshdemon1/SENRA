@@ -114,7 +114,7 @@ export default function DashboardPage() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.15, duration: 0.4 }}
           className="relative bg-bg-base border border-border-default rounded-2xl overflow-hidden"
-          style={{ minHeight: 520 }}
+          style={{ height: 520 }}
         >
           {displayStates && (
             <IndiaMap
