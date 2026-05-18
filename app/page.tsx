@@ -15,9 +15,6 @@ import { BAND_COLORS } from '@/lib/constants'
 import { SECTOR_WEIGHTS } from '@/lib/sectorWeights'
 import { AboutDataFooter } from '@/components/ui/AboutDataFooter'
 import { exportScoresCsv } from '@/lib/exportCsv'
-import { YearSelector } from '@/components/dashboard/YearSelector'
-import { getScoresForYear } from '@/data/historical-scores'
-import type { Year } from '@/data/historical-scores'
 
 const IndiaMap = dynamic(
   () => import('@/components/map/IndiaMap').then(m => m.IndiaMap),
@@ -31,7 +28,6 @@ export default function DashboardPage() {
   const [customScores, setCustomScores] = useState<StateScore[] | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
-  const [selectedYear, setSelectedYear] = useState<number>(2024)
   const isMobile = useMediaQuery('(max-width: 480px)')
 
   // Clear custom slider scores when sector button is clicked so sector weights take effect
@@ -61,28 +57,13 @@ export default function DashboardPage() {
       .map((s, i) => ({ ...s, rank: i + 1 }))
   }, [baseData, activeSector])
 
+  const displayStates = customScores ?? sectorStates
+
   const handleMapSelect = useCallback((slug: string) => {
     setSelectedSlug(slug)
     setSheetOpen(true)
   }, [])
 
-  // When a historical year is selected, overlay historical scores on current state list
-  const historicalStates = useMemo(() => {
-    const base = customScores ?? sectorStates
-    if (!base || selectedYear === 2024) return base
-    const yearScores = getScoresForYear(selectedYear as Year)
-    return base.map(s => {
-      const histScore = yearScores[s.slug]
-      if (histScore == null) return s
-      const band: Band =
-        histScore >= 70 ? 'CRITICAL' :
-        histScore >= 50 ? 'HIGH' :
-        histScore >= 30 ? 'MODERATE' : 'LOW'
-      return { ...s, score: histScore, band }
-    })
-  }, [customScores, sectorStates, selectedYear])
-
-  const displayStates = historicalStates
   const selectedState = selectedSlug ? displayStates?.find(s => s.slug === selectedSlug) : null
 
   if (isLoading && !baseData) return <SenraAppSkeleton />
@@ -154,11 +135,6 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Year selector */}
-          <div className="absolute top-3 right-3 z-20 bg-bg-void/80 backdrop-blur-sm rounded-lg px-2 py-1.5">
-            <YearSelector value={selectedYear} onChange={setSelectedYear} />
-          </div>
-
           {/* Legend */}
           <div className="absolute bottom-4 left-4 bg-bg-void/80 backdrop-blur-sm rounded-lg px-3 py-2 flex flex-col gap-1.5">
             {[['CRITICAL', '#C0341D'], ['HIGH', '#CC7A0A'], ['MODERATE', '#AA9700'], ['LOW', '#2A8556']].map(([label, color]) => (
@@ -219,7 +195,6 @@ export default function DashboardPage() {
       <AnimatePresence>
         {isMobile && (
           <MobileBottomSheet isOpen={sheetOpen} onClose={() => { setSheetOpen(false); setSelectedSlug(null) }}>
-            {/* Mini-header — visible in collapsed (80px) state */}
             {selectedState && (
               <div
                 className="flex items-center justify-between pb-3 mb-3"

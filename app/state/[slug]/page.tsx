@@ -7,8 +7,6 @@ import { MetricRadar } from '@/components/dashboard/MetricRadar'
 import { TrendChart } from '@/components/dashboard/TrendChart'
 import { AnimatedScore } from '@/components/ui/AnimatedScore'
 import { UncertaintyBadge } from '@/components/ui/UncertaintyBadge'
-import { Sparkline } from '@/components/dashboard/Sparkline'
-import { getStateHistory } from '@/data/historical-scores'
 import { DIMENSIONS, BAND_COLORS } from '@/lib/constants'
 import type { StateProfile, Band } from '@/lib/types'
 import Link from 'next/link'
@@ -103,8 +101,6 @@ export default function StatePage({ params }: { params: { slug: string } }) {
   const profile = getStateProfile(params.slug)
   if (!profile) notFound()
 
-  const history = getStateHistory(profile.slug)
-
   const worstDims = [...DIMENSIONS]
     .sort((a, b) => profile.subscores[b.key] - profile.subscores[a.key])
     .slice(0, 2)
@@ -137,13 +133,7 @@ export default function StatePage({ params }: { params: { slug: string } }) {
             <span className="numeric">Confidence: {profile.confidence.toFixed(0)}%</span>
           </div>
         </div>
-        {history.length > 1 && (
-          <div className="mt-2 flex items-center gap-2">
-            <div className="text-xs text-text-tertiary">2019–2024</div>
-            <Sparkline data={history} color={BAND_COLORS[profile.band]} width={100} height={28} />
-          </div>
-        )}
-        <div className="flex flex-col items-end gap-3 ml-auto">
+<div className="flex flex-col items-end gap-3 ml-auto">
           <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-mono,monospace)' }}>
             Data: 2023–24 govt. estimates ·{' '}
             <Link href="/methodology#citations" style={{ color: '#E0981E', textDecoration: 'none' }}>Sources</Link>
