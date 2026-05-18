@@ -48,11 +48,16 @@ function initSchema(db: Database.Database) {
       subscore_power REAL,
       subscore_cold_chain REAL,
       subscore_concentration REAL,
+      score_uncertainty REAL,
       imputed_dimensions TEXT DEFAULT '[]',
       sector_preset TEXT DEFAULT 'default',
       FOREIGN KEY (state_id) REFERENCES states(id)
     );
 
+  `)
+  // Defensive migration for existing DBs that predate the score_uncertainty column
+  try { db.exec(`ALTER TABLE fragility_scores ADD COLUMN score_uncertainty REAL`) } catch {}
+  db.exec(`
     CREATE TABLE IF NOT EXISTS data_refresh_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       ran_at TEXT DEFAULT (datetime('now')),

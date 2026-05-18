@@ -55,6 +55,7 @@ export async function GET(req: NextRequest) {
       return {
         state: r.name, slug: r.slug, iso_code: r.iso_code, region: r.region,
         score: r.score, rank: r.rank, band: r.band, confidence: r.confidence,
+        scoreUncertainty: r.score_uncertainty as number | null ?? undefined,
         subscores: {
           road_quality:         r.subscore_road,
           business_density:     r.subscore_business,

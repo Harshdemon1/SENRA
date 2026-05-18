@@ -16,6 +16,7 @@ function shapeScore(row: DbRow) {
     rank:       row.rank,
     band:       row.band,
     confidence: row.confidence,
+    scoreUncertainty: row.score_uncertainty as number | null ?? undefined,
     subscores: {
       road_quality:         row.subscore_road,
       business_density:     row.subscore_business,

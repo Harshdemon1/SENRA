@@ -6,7 +6,10 @@ import { ScoreBar } from '@/components/ui/ScoreBar'
 import { MetricRadar } from '@/components/dashboard/MetricRadar'
 import { TrendChart } from '@/components/dashboard/TrendChart'
 import { AnimatedScore } from '@/components/ui/AnimatedScore'
-import { DIMENSIONS } from '@/lib/constants'
+import { UncertaintyBadge } from '@/components/ui/UncertaintyBadge'
+import { Sparkline } from '@/components/dashboard/Sparkline'
+import { getStateHistory } from '@/data/historical-scores'
+import { DIMENSIONS, BAND_COLORS } from '@/lib/constants'
 import type { StateProfile, Band } from '@/lib/types'
 import Link from 'next/link'
 import { getDb } from '@/lib/db'
@@ -76,6 +79,7 @@ function getStateProfile(slug: string): StateProfile | null {
       iso_code: state.iso_code as string, region: state.region as string,
       score: fs.score as number, rank: fs.rank as number,
       band: fs.band as Band, confidence: fs.confidence as number,
+      scoreUncertainty: (fs.score_uncertainty as number | null) ?? undefined,
       subscores: {
         road_quality: fs.subscore_road as number,
         business_density: fs.subscore_business as number,
@@ -99,6 +103,8 @@ export default function StatePage({ params }: { params: { slug: string } }) {
   const profile = getStateProfile(params.slug)
   if (!profile) notFound()
 
+  const history = getStateHistory(profile.slug)
+
   const worstDims = [...DIMENSIONS]
     .sort((a, b) => profile.subscores[b.key] - profile.subscores[a.key])
     .slice(0, 2)
@@ -121,13 +127,27 @@ export default function StatePage({ params }: { params: { slug: string } }) {
             <Badge band={profile.band} />
           </div>
           <div className="flex flex-wrap gap-4 text-sm text-text-secondary">
-            <span className="numeric">Score: <strong className="text-text-primary senra-score-display"><AnimatedScore value={profile.score} decimals={1} /></strong>/100</span>
+            <span className="numeric flex items-baseline gap-1.5">
+              Score: <strong className="text-text-primary senra-score-display"><AnimatedScore value={profile.score} decimals={1} /></strong>
+              {profile.scoreUncertainty != null && <UncertaintyBadge value={profile.scoreUncertainty} />}
+              /100
+            </span>
             <span className="numeric">Rank: <strong className="text-text-primary">#{profile.rank}</strong> of 36</span>
             <span>Region: {profile.region}</span>
             <span className="numeric">Confidence: {profile.confidence.toFixed(0)}%</span>
           </div>
         </div>
-        <div className="flex gap-3 ml-auto">
+        {history.length > 1 && (
+          <div className="mt-2 flex items-center gap-2">
+            <div className="text-xs text-text-tertiary">2019–2024</div>
+            <Sparkline data={history} color={BAND_COLORS[profile.band]} width={100} height={28} />
+          </div>
+        )}
+        <div className="flex flex-col items-end gap-3 ml-auto">
+          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-mono,monospace)' }}>
+            Data: 2023–24 govt. estimates ·{' '}
+            <Link href="/methodology#citations" style={{ color: '#E0981E', textDecoration: 'none' }}>Sources</Link>
+          </div>
           <Link
             href={`/compare?states=${params.slug}`}
             className="text-xs px-3 py-1.5 rounded-lg border border-border-default text-text-secondary hover:text-text-primary hover:border-accent transition-colors"

@@ -88,6 +88,41 @@ function imputeMissing(
   return { imputed, isImputed }
 }
 
+// Per-dimension data quality uncertainty (in subscore points, 0-100 scale).
+// Root-sum-of-squares propagation through weighted composite.
+const DIM_UNCERTAINTY: Record<string, number> = {
+  road_quality: 2.0,       // MoRTH data: low uncertainty
+  business_density: 4.0,   // MCA proxy: moderate
+  monsoon_disruption: 5.0, // IMD composite: moderate-high
+  logistics_access: 2.5,   // LEADS score: low-moderate
+  power_reliability: 3.0,  // CEA data: moderate
+  cold_chain_infra: 4.5,   // NCCD coverage gaps: moderate-high
+  market_concentration: 6.0, // Proxy metric: high
+}
+
+const SPARSE_STATES = new Set([
+  'ladakh', 'lakshadweep', 'arunachal-pradesh', 'manipur',
+  'mizoram', 'nagaland', 'sikkim', 'andaman-and-nicobar-islands',
+])
+
+export function computeUncertainty(
+  weights: Record<string, number>,
+  slug: string,
+  imputedDims: string[],
+): number {
+  let sumSq = 0
+  for (const dim of SCORER_DIMENSIONS) {
+    const w = weights[dim.key] ?? dim.defaultWeight
+    const u = DIM_UNCERTAINTY[dim.key] ?? 3
+    sumSq += (w * u) ** 2
+  }
+  // Each imputed dimension adds an extra penalty
+  sumSq += imputedDims.length * 0.25
+  let uncertainty = Math.sqrt(sumSq)
+  if (SPARSE_STATES.has(slug)) uncertainty *= 1.4
+  return Math.round(uncertainty * 10) / 10
+}
+
 export interface ComputedScore {
   state: string
   slug: string
@@ -95,6 +130,7 @@ export interface ComputedScore {
   rank: number
   band: string
   confidence: number
+  scoreUncertainty: number
   subscores: Record<string, number>
   imputedDims: string[]
 }
@@ -126,15 +162,18 @@ export function computeFragilityScores(
       if (dimImputed[dim.key][i]) imputedCount++
     }
 
+    const slug = slugMap[state] ?? state.toLowerCase().replace(/\s+/g, '-')
+    const imputedDims = SCORER_DIMENSIONS.filter(d => dimImputed[d.key][i]).map(d => d.key)
     return {
       state,
-      slug: slugMap[state] ?? state.toLowerCase().replace(/\s+/g, '-'),
+      slug,
       score: Math.round(composite * 10) / 10,
       rank: 0,
       band: '',
       confidence: Math.round((1 - imputedCount / SCORER_DIMENSIONS.length) * 100),
+      scoreUncertainty: computeUncertainty(weights, slug, imputedDims),
       subscores,
-      imputedDims: SCORER_DIMENSIONS.filter(d => dimImputed[d.key][i]).map(d => d.key),
+      imputedDims,
     }
   })
 

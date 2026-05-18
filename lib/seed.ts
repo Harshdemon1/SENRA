@@ -182,12 +182,12 @@ export function seedIfEmpty(): void {
     (state_id, computed_at, score, rank, band, confidence,
      subscore_road, subscore_business, subscore_monsoon, subscore_logistics,
      subscore_power, subscore_cold_chain, subscore_concentration,
-     imputed_dimensions, sector_preset)
+     score_uncertainty, imputed_dimensions, sector_preset)
     VALUES
     (@state_id, @computed_at, @score, @rank, @band, @confidence,
      @subscore_road, @subscore_business, @subscore_monsoon, @subscore_logistics,
      @subscore_power, @subscore_cold_chain, @subscore_concentration,
-     @imputed_dimensions, @sector_preset)
+     @score_uncertainty, @imputed_dimensions, @sector_preset)
   `)
 
   const seedAll = db.transaction(() => {
@@ -210,6 +210,7 @@ export function seedIfEmpty(): void {
           subscore_power:     s.subscores.power_reliability,
           subscore_cold_chain:s.subscores.cold_chain_infra,
           subscore_concentration: s.subscores.market_concentration,
+          score_uncertainty:  s.scoreUncertainty,
           imputed_dimensions: JSON.stringify(s.imputedDims),
           sector_preset:      preset,
         })

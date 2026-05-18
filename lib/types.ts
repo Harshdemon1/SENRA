@@ -21,6 +21,13 @@ export interface StateScore {
   confidence: number
   subscores: Subscores
   imputed_dims: string[]
+  scoreUncertainty?: number
+}
+
+export interface HistoricalPoint {
+  year: number
+  score: number
+  band: Band
 }
 
 export interface ScorePoint {

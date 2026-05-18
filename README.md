@@ -1,58 +1,70 @@
-# SENRA — Supply Chain Risk Intelligence
+# SENRA — Supply and Economic Network Risk Analysis
 
-> The first public, algorithmically-derived ranking of retail supply chain fragility across all 28 Indian states and 8 Union Territories.
+> A data intelligence tool scoring all 37 Indian states and Union Territories on supply chain risk across 7 structural dimensions. Built to support distribution strategy, logistics planning, and regional risk assessment.
 
-**[Live App →](https://senra.vercel.app)** | **[Methodology →](/methodology)**
-
----
-
-## What It Does
-
-A decision-support tool for logistics directors, VC analysts, and policy researchers. It computes a **Supply Chain Fragility Score** for every Indian state and UT across 7 dimensions of risk — road infrastructure, distributor density, monsoon disruption, logistics access, power reliability, cold chain infrastructure, and market concentration.
-
-- **Interactive choropleth map** — colour-coded by risk band (CRITICAL / HIGH / MODERATE / LOW)
-- **Live weight adjustment** — drag 7 sliders to reweight dimensions for your sector (FMCG, Pharma, Cold Chain, etc.)
-- **State drill-down** — full profile with radar chart, trend history, and raw data
-- **Compare tool** — side-by-side comparison of up to 4 states
+**Live tool:** [senra.vercel.app](https://senra.vercel.app)  
+**Author:** Harsh Menon · Cambridge AS Level candidate · Mumbai, India  
+**Data vintage:** 2023–24 government publications
 
 ---
 
-## Architecture
+## The problem
 
-Single Next.js process. No Python. No external database.
+India's logistics landscape is not one market — it is 37 overlapping markets with different road quality, monsoon exposure, cold storage capacity, power reliability, and distributor density. A company making a single national distribution decision is implicitly making 37 different risk decisions, most of them with incomplete information.
 
-```
-Browser  →  Next.js (port 3000)
-                ├── /api/scores      — ranked fragility scores
-                ├── /api/scores/:slug — full state profile
-                ├── /api/compare     — multi-state comparison
-                ├── /api/compute     — custom weight recompute
-                └── /api/meta        — data freshness metadata
-                        ↓
-                   better-sqlite3 (senra.db — auto-created on first request)
-```
+Existing tools either operate at the national level (masking state-level variation) or require expensive proprietary data. SENRA provides a free, transparent, and methodologically documented alternative.
 
 ---
 
-## Quick Start
+## What SENRA scores
 
-### Windows — one double-click
+Seven dimensions of supply chain fragility, each sourced from government data:
 
-```
-start.bat
-```
+| # | Dimension | Source | Default Weight |
+|---|---|---|---|
+| 1 | Road Infrastructure | MoRTH Annual Report 2023–24 | 22% |
+| 2 | Distributor Density | MCA/MSME registrations | 18% |
+| 3 | Monsoon Disruption Risk | IMD rainfall statistics | 18% |
+| 4 | Logistics Access | LEADS 2023 (Ministry of Commerce) | 16% |
+| 5 | Power Grid Reliability | CEA Annual Report 2023–24 | 12% |
+| 6 | Cold Chain Infrastructure | NCCD state-wise capacity data | 8% |
+| 7 | Distributor Concentration | Derived from MCA district-level data | 6% |
 
-### macOS / Linux — one command
-
-```bash
-chmod +x start.sh && ./start.sh
-```
-
-That's it. Opens `http://localhost:3000`. The database is created automatically on first load — no setup, no accounts, no environment variables needed.
+Six sector presets (Default, FMCG, Pharma, Cold Chain, E-Commerce, Agriculture) reweight these dimensions to reflect sector-specific operational priorities.
 
 ---
 
-### Manual setup
+## Features
+
+- **Choropleth map** — all 37 states coloured by risk band, click any state for full breakdown
+- **Sector presets** — switch between 6 industry weight profiles; map updates in real time
+- **State comparison** — side-by-side radar chart and dimension table for any two states
+- **Corridor scoring** — aggregate risk score for any A→B supply route across traversed states
+- **Historical trends** — year-on-year composite scores from 2019–2024
+- **Uncertainty bands** — ±range on every score reflecting data proxy quality
+- **Export** — CSV of all 37 states with dimension scores
+
+---
+
+## Methodology
+
+Scores are normalised using clipped min-max normalisation (5th–95th percentile clipping to prevent outlier compression). Higher scores indicate higher fragility. Risk bands: CRITICAL (≥70), HIGH (50–69), MODERATE (30–49), LOW (<30).
+
+Full methodology, data sources, normalisation formula, and limitations: [senra.vercel.app/methodology](https://senra.vercel.app/methodology)
+
+---
+
+## Stack
+
+- **Framework:** Next.js 14 (App Router), TypeScript
+- **Database:** SQLite via `better-sqlite3` (auto-created on first request; no runtime DB server)
+- **Map:** `react-simple-maps` with India GeoJSON
+- **Deployment:** Vercel (deploys from `main`)
+- **No external API dependencies** — all scores are precomputed from static government data
+
+---
+
+## Quick start
 
 ```bash
 npm install
@@ -60,73 +72,48 @@ npm run dev
 # Open http://localhost:3000
 ```
 
----
-
-## Data Sources
-
-| Source | Dimension | Cadence | Fallback |
-|---|---|---|---|
-| MoRTH / data.gov.in | Road Infrastructure | Annual | Yes |
-| MCA21 / data.gov.in | Distributor Density | Monthly | Yes |
-| IMD Rainfall Dataset | Monsoon Disruption | Monthly | Yes |
-| MoCI LEADS PDF | Logistics Access | Annual | Yes |
-| CEA / PFC Reports | Power Reliability | Annual | Yes |
-| NHB / data.gov.in | Cold Chain Infra | Annual | Yes |
-
-> All sources are publicly available under India's NDSAP (National Data Sharing and Accessibility Policy).
+The database is created and seeded automatically on first load. No setup, no accounts, no environment variables needed.
 
 ---
 
-## Scoring Methodology
+## API
 
-See [/methodology](/methodology) for the full writeup. Summary:
-
-1. **Fetch** raw data from 6 government sources (fallback to 2023-24 estimates if unavailable)
-2. **Normalise** each dimension to 0–100 using clipped min-max (5th/95th percentile)
-3. **Impute** missing values using regional median → national median
-4. **Weight** and sum subscores into a composite fragility score
-5. **Rank** states and assign risk bands (CRITICAL/HIGH/MODERATE/LOW)
-6. **Confidence** = fraction of dimensions with real (non-imputed) data
+| Endpoint | Description |
+|---|---|
+| `GET /api/scores?sector=default` | All 37 states ranked by fragility |
+| `GET /api/scores/:slug` | Full state profile with history |
+| `GET /api/compare?states=a,b&sector=default` | Side-by-side comparison |
+| `GET /api/meta` | Data freshness and confidence metadata |
 
 ---
 
-## India Map GeoJSON
+## Data sources
 
-The `public/india-states.json` file ships with placeholder stub polygons.
-Replace it with the real file for an accurate choropleth:
+See [`data/sources.md`](data/sources.md) for full citations, URLs, and methodology notes per dimension.
 
-```bash
-# Download from datameet/maps (CC0 license)
-curl -L https://github.com/datameet/maps/raw/master/States/Admin2.geojson \
-  -o public/india-states.json
+---
+
+## Limitations
+
+SENRA captures formal, registered, government-reported infrastructure. It does not capture:
+- Informal distribution networks (significant in Bihar, UP)
+- Real-time disruption events (strikes, floods, road closures)
+- Private logistics infrastructure (3PL warehouses, dark stores)
+- Drought risk (the monsoon dimension captures excess rainfall, not deficit)
+
+See the [Limitations section](https://senra.vercel.app/methodology#limitations) for full discussion.
+
+---
+
+## Citing SENRA
+
 ```
-
-The file must have `properties.ST_NM` matching state display names (e.g. `"Tamil Nadu"`, `"West Bengal"`).
-
----
-
-## Adding a New Dimension
-
-1. `lib/scorer.ts` — add entry to `SCORER_DIMENSIONS`, add fallback data to `lib/seed.ts`
-2. `lib/constants.ts` — add entry to `DIMENSIONS` array
-3. `lib/types.ts` — add field to `Subscores` interface
-
----
-
-## Cite This Project
-
-```bibtex
-@misc{senra2026,
-  title  = {SENRA — Supply Chain Risk Intelligence},
-  author = {Harsh Menon},
-  year   = {2026},
-  url    = {https://github.com/Harshdemon1/SENRA},
-  note   = {Open source under MIT License.}
-}
+Menon, H. (2024). SENRA: Supply and Economic Network Risk Analysis [Data tool].
+Retrieved from https://senra.vercel.app
 ```
 
 ---
 
-## License
+## Licence
 
-MIT. Data sources: Government of India (NDSAP), datameet/maps (CC0).
+MIT. Data is sourced from Indian government publications under India's National Data Sharing and Accessibility Policy (NDSAP).

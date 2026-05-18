@@ -12,6 +12,11 @@ import { MobileBottomSheet } from '@/components/ui/MobileBottomSheet'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import type { StateScore, Band } from '@/lib/types'
 import { BAND_COLORS, SECTOR_PRESETS } from '@/lib/constants'
+import { AboutDataFooter } from '@/components/ui/AboutDataFooter'
+import { exportScoresCsv } from '@/lib/exportCsv'
+import { YearSelector } from '@/components/dashboard/YearSelector'
+import { getScoresForYear } from '@/data/historical-scores'
+import type { Year } from '@/data/historical-scores'
 
 const IndiaMap = dynamic(
   () => import('@/components/map/IndiaMap').then(m => m.IndiaMap),
@@ -28,6 +33,7 @@ export default function DashboardPage() {
   const [customScores, setCustomScores] = useState<StateScore[] | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
+  const [selectedYear, setSelectedYear] = useState<number>(2024)
   const isMobile = useMediaQuery('(max-width: 480px)')
 
   // Recompute scores client-side when sector changes: Σ(subscore_i × weight_i)
@@ -58,7 +64,23 @@ export default function DashboardPage() {
     setSheetOpen(true)
   }, [])
 
-  const displayStates = customScores ?? sectorStates
+  // When a historical year is selected, overlay historical scores on current state list
+  const historicalStates = useMemo(() => {
+    const base = customScores ?? sectorStates
+    if (!base || selectedYear === 2024) return base
+    const yearScores = getScoresForYear(selectedYear as Year)
+    return base.map(s => {
+      const histScore = yearScores[s.slug]
+      if (histScore == null) return s
+      const band: Band =
+        histScore >= 70 ? 'CRITICAL' :
+        histScore >= 50 ? 'HIGH' :
+        histScore >= 30 ? 'MODERATE' : 'LOW'
+      return { ...s, score: histScore, band }
+    })
+  }, [customScores, sectorStates, selectedYear])
+
+  const displayStates = historicalStates
   const selectedState = selectedSlug ? displayStates?.find(s => s.slug === selectedSlug) : null
 
   if (isLoading && !baseData) return <SenraAppSkeleton />
@@ -79,7 +101,18 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex flex-col items-end gap-2">
-          <SectorToggle />
+          <div className="flex items-center gap-2">
+            <SectorToggle />
+            {displayStates && (
+              <button
+                onClick={() => exportScoresCsv(displayStates, sector)}
+                className="text-xs px-3 py-1.5 rounded-full border border-white/20 hover:border-white/50 hover:text-text-primary text-text-secondary transition-colors hidden sm:block"
+                title="Export all states as CSV"
+              >
+                Export CSV
+              </button>
+            )}
+          </div>
           {meta && (
             <div className="flex gap-4 text-xs text-text-tertiary">
               <span>Updated {meta.last_updated ? new Date(meta.last_updated).toLocaleDateString() : '—'}</span>
@@ -118,6 +151,11 @@ export default function DashboardPage() {
               <span className="text-xs text-text-tertiary">{String(error)}</span>
             </div>
           )}
+
+          {/* Year selector */}
+          <div className="absolute top-3 right-3 z-20 bg-bg-void/80 backdrop-blur-sm rounded-lg px-2 py-1.5">
+            <YearSelector value={selectedYear} onChange={setSelectedYear} />
+          </div>
 
           {/* Legend */}
           <div className="absolute bottom-4 left-4 bg-bg-void/80 backdrop-blur-sm rounded-lg px-3 py-2 flex flex-col gap-1.5">
@@ -172,6 +210,8 @@ export default function DashboardPage() {
           <WeightSliders onScoresUpdate={setCustomScores} />
         </div>
       </div>
+
+      <AboutDataFooter />
 
       {/* Mobile bottom sheet */}
       <AnimatePresence>

@@ -26,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/" className="px-3 py-1.5 rounded-full border border-white/20 hover:border-white/50 hover:text-text-primary transition-colors">Dashboard</Link>
               <MethodologyLink />
               <CompareLink />
+              <Link href="/corridor" className="px-3 py-1.5 rounded-full border border-white/20 hover:border-white/50 hover:text-text-primary transition-colors">Corridor</Link>
               <a
                 href="https://github.com/Harshdemon1/SENRA"
                 target="_blank"
