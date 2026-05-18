@@ -212,7 +212,7 @@ export const IndiaMap = memo(function IndiaMap({ scores, selectedSlug, onSelect 
         projection="geoMercator"
         projectionConfig={{ center: [82, 22], scale: 1000 }}
         className="w-full h-full"
-        style={{ willChange: 'transform', outline: 'none' }}
+        style={{ willChange: 'transform', outline: 'none', background: 'transparent' }}
       >
         <ZoomableGroup
           zoom={isMobile ? zoom * 1.4 : zoom}
