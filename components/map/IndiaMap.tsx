@@ -197,7 +197,7 @@ export const IndiaMap = memo(function IndiaMap({ scores, selectedSlug, onSelect 
   return (
     <div
       className="absolute inset-0 w-full"
-      style={{ opacity: mapVisible ? 1 : 0, transition: 'opacity 0.5s ease' }}
+      style={{ height: '100%', opacity: mapVisible ? 1 : 0, transition: 'opacity 0.5s ease' }}
     >
       <svg width="0" height="0">
         <defs>
