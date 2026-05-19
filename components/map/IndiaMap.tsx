@@ -221,7 +221,7 @@ export const IndiaMap = memo(function IndiaMap({ scores, selectedSlug, onSelect 
       >
         <ZoomableGroup
           zoom={isMobile ? zoom * 1.4 : zoom}
-          center={[82, 22]}
+          center={[400, 300]}
           minZoom={0.8}
           maxZoom={8}
           onMoveEnd={({ zoom: z }) => setZoom(isMobile ? z / 1.4 : z)}
