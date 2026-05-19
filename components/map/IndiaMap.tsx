@@ -210,7 +210,12 @@ export const IndiaMap = memo(function IndiaMap({ scores, selectedSlug, onSelect 
       {/* will-change on the SVG (not outer div) so the GPU layer covers the element being transformed */}
       <ComposableMap
         projection="geoMercator"
-        projectionConfig={{ center: [82, 22], scale: 1000 }}
+        projectionConfig={{
+          scale: 350,
+          center: [82, 22],
+          rotate: [0, 0, 0],
+        }}
+        {...({ width: 800, height: 600 } as any)}
         className="w-full h-full"
         style={{ willChange: 'transform', outline: 'none', background: 'transparent' }}
       >
