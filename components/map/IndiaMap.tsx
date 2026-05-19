@@ -148,6 +148,17 @@ export const IndiaMap = memo(function IndiaMap({ scores, selectedSlug, onSelect 
     fetch(GEO_URL)
       .then(r => r.json())
       .then(data => {
+        // Source GeoJSON uses ESRI-style clockwise outer rings; d3-geo's
+        // spherical Mercator requires CCW per RFC 7946, otherwise each
+        // polygon is interpreted as world-minus-state and fills the viewport.
+        data.features?.forEach((f: { geometry: { type: string; coordinates: number[][][] | number[][][][] } }) => {
+          const g = f.geometry
+          if (g.type === 'Polygon') {
+            (g.coordinates as number[][][])[0]?.reverse()
+          } else if (g.type === 'MultiPolygon') {
+            (g.coordinates as number[][][][]).forEach(poly => poly[0]?.reverse())
+          }
+        })
         setGeoData(data)
         setMapLoading(false)
         requestAnimationFrame(() => setMapVisible(true))
@@ -211,7 +222,7 @@ export const IndiaMap = memo(function IndiaMap({ scores, selectedSlug, onSelect 
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{
-          scale: 350,
+          scale: 1000,
           center: [82, 22],
           rotate: [0, 0, 0],
         }}
@@ -221,7 +232,7 @@ export const IndiaMap = memo(function IndiaMap({ scores, selectedSlug, onSelect 
       >
         <ZoomableGroup
           zoom={isMobile ? zoom * 1.4 : zoom}
-          center={[400, 300]}
+          center={[82, 22]}
           minZoom={0.8}
           maxZoom={8}
           onMoveEnd={({ zoom: z }) => setZoom(isMobile ? z / 1.4 : z)}
