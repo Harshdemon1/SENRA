@@ -117,33 +117,49 @@ export default function StatePage({ params }: { params: { slug: string } }) {
 
       {/* Hero */}
       <div className="flex flex-wrap items-start gap-6 mb-8">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-semibold text-text-primary senra-state-name">{profile.state}</h1>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3 mb-5">
+            <h1 className="text-text-primary senra-state-name">{profile.state}</h1>
             <Badge band={profile.band} />
           </div>
-          <div className="flex flex-wrap gap-4 text-sm text-text-secondary">
-            <span className="numeric flex items-baseline gap-1.5">
-              Score: <strong className="text-text-primary senra-score-display"><AnimatedScore value={profile.score} decimals={1} /></strong>
-              {profile.scoreUncertainty != null && <UncertaintyBadge value={profile.scoreUncertainty} />}
-              /100
-            </span>
-            <span className="numeric">Rank: <strong className="text-text-primary">#{profile.rank}</strong> of 36</span>
-            <span>Region: {profile.region}</span>
-            <span className="numeric">Confidence: {profile.confidence.toFixed(0)}%</span>
+          <div className="flex flex-wrap items-end gap-x-8 gap-y-4">
+            <div className="flex flex-col">
+              <span className="text-[11px] uppercase tracking-wider text-text-tertiary mb-1">Score</span>
+              <div className="flex items-baseline gap-2">
+                <strong className="text-text-primary senra-score-display leading-none">
+                  <AnimatedScore value={profile.score} decimals={1} />
+                </strong>
+                <span className="numeric text-xs text-text-tertiary">
+                  {profile.scoreUncertainty != null && <UncertaintyBadge value={profile.scoreUncertainty} />}
+                  <span className="ml-1">/100</span>
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[11px] uppercase tracking-wider text-text-tertiary mb-1">Rank</span>
+              <span className="numeric text-text-primary text-lg">#{profile.rank}<span className="text-text-tertiary text-sm font-normal"> / 36</span></span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[11px] uppercase tracking-wider text-text-tertiary mb-1">Region</span>
+              <span className="text-text-primary text-lg">{profile.region}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[11px] uppercase tracking-wider text-text-tertiary mb-1">Confidence</span>
+              <span className="numeric text-text-primary text-lg">{profile.confidence.toFixed(0)}%</span>
+            </div>
           </div>
         </div>
-<div className="flex flex-col items-end gap-3 ml-auto">
-          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-mono,monospace)' }}>
-            Data: 2023–24 govt. estimates ·{' '}
-            <Link href="/methodology#citations" style={{ color: '#E0981E', textDecoration: 'none' }}>Sources</Link>
-          </div>
+        <div className="flex flex-col items-end gap-3">
           <Link
             href={`/compare?states=${params.slug}`}
             className="text-xs px-3 py-1.5 rounded-lg border border-border-default text-text-secondary hover:text-text-primary hover:border-accent transition-colors"
           >
             Compare
           </Link>
+          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', fontFamily: 'var(--font-mono,monospace)' }}>
+            Data: 2023–24 govt. estimates ·{' '}
+            <Link href="/methodology#citations" style={{ color: '#E0981E', textDecoration: 'none' }}>Sources</Link>
+          </div>
         </div>
       </div>
 

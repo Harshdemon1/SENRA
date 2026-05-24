@@ -125,14 +125,16 @@ html, body {
 }
 
 .senra-score-display {
-  font-size: clamp(32px, 6vw, 56px);
+  font-size: clamp(28px, 3.6vw, 38px);
   font-family: 'Azeret Mono', monospace;
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 .senra-state-name {
-  font-size: clamp(18px, 3.5vw, 28px);
+  font-size: clamp(20px, 3.2vw, 30px);
   font-family: 'Bricolage Grotesque', sans-serif;
   font-weight: 600;
+  letter-spacing: -0.015em;
 }
 .senra-dimension-label {
   white-space: nowrap;
