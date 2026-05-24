@@ -108,7 +108,7 @@ See the [Limitations section](https://senra.vercel.app/methodology#limitations) 
 ## Citing SENRA
 
 ```
-Menon, H. (2024). SENRA: Supply and Economic Network Risk Analysis [Data tool].
+Menon, Harsh. (2024). SENRA: Supply and Economic Network Risk Analysis [Data tool].
 Retrieved from https://senra.vercel.app
 ```
 
