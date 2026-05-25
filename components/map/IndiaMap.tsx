@@ -218,46 +218,61 @@ export const IndiaMap = memo(function IndiaMap({ scores, selectedSlug, onSelect 
         </defs>
       </svg>
 
-      {/* will-change on the SVG (not outer div) so the GPU layer covers the element being transformed */}
-      <ComposableMap
-        projection="geoMercator"
-        projectionConfig={{
-          scale: isMobile ? 780 : 1000,
-          center: [82, 22],
-          rotate: [0, 0, 0],
-        }}
-        {...({ width: 800, height: 600 } as any)}
-        className="w-full h-full"
-        style={{ willChange: 'transform', outline: 'none', background: 'transparent' }}
-      >
-        <ZoomableGroup
-          zoom={zoom}
-          center={[82, 22]}
-          minZoom={0.8}
-          maxZoom={8}
-          onMoveEnd={({ zoom: z }) => setZoom(z)}
-        >
-          <Geographies geography={geoData ?? GEO_URL}>
-            {({ geographies }) => {
-              // Cache on first delivery — keeps GeoList's memo reference stable
-              // across IndiaMap re-renders triggered by tooltip/zoom state.
-              if (!cachedGeosRef.current && geographies.length > 0) {
-                cachedGeosRef.current = geographies
-              }
-              return (
-                <GeoList
-                  geographies={cachedGeosRef.current ?? geographies}
-                  scoreMap={scoreMap}
-                  selectedSlug={selectedSlug}
-                  onEnter={handleEnter}
-                  onLeave={handleLeave}
-                  onClickSlug={handleClickSlug}
-                />
-              )
+      {/* Mobile gets a fixed 320px wrapper with overflow:hidden so the projection
+          (tuned via smaller viewBox + lower scale) is fully contained. Desktop
+          keeps the original setup untouched. */}
+      {(() => {
+        const composableMap = (
+          <ComposableMap
+            projection="geoMercator"
+            projectionConfig={{
+              scale: isMobile ? 800 : 1000,
+              center: isMobile ? [82, 23] : [82, 22],
+              rotate: [0, 0, 0],
             }}
-          </Geographies>
-        </ZoomableGroup>
-      </ComposableMap>
+            {...({ width: isMobile ? 400 : 800, height: isMobile ? 500 : 600 } as any)}
+            className={isMobile ? undefined : 'w-full h-full'}
+            style={{
+              width: '100%',
+              height: '100%',
+              willChange: 'transform',
+              outline: 'none',
+              background: 'transparent',
+            }}
+          >
+            <ZoomableGroup
+              zoom={zoom}
+              center={[82, 22]}
+              minZoom={0.8}
+              maxZoom={8}
+              onMoveEnd={({ zoom: z }) => setZoom(z)}
+            >
+              <Geographies geography={geoData ?? GEO_URL}>
+                {({ geographies }) => {
+                  if (!cachedGeosRef.current && geographies.length > 0) {
+                    cachedGeosRef.current = geographies
+                  }
+                  return (
+                    <GeoList
+                      geographies={cachedGeosRef.current ?? geographies}
+                      scoreMap={scoreMap}
+                      selectedSlug={selectedSlug}
+                      onEnter={handleEnter}
+                      onLeave={handleLeave}
+                      onClickSlug={handleClickSlug}
+                    />
+                  )
+                }}
+              </Geographies>
+            </ZoomableGroup>
+          </ComposableMap>
+        )
+        return isMobile ? (
+          <div style={{ width: '100%', height: '320px', overflow: 'hidden', position: 'relative' }}>
+            {composableMap}
+          </div>
+        ) : composableMap
+      })()}
 
       {/* Tooltip: React controls visibility + content; DOM controls position */}
       <div
