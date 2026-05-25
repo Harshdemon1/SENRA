@@ -73,18 +73,18 @@ export default function DashboardPage() {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="px-6 py-6"
+      className="senra-page px-6 py-6"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-text-primary">SENRA</h1>
-          <p className="text-sm text-text-secondary mt-1">
+          <h1 className="senra-page-title text-2xl font-semibold text-text-primary">SENRA</h1>
+          <p className="senra-page-subtitle text-sm text-text-secondary mt-1">
             Ranking supply chain risk across 36 states and UTs
           </p>
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex items-center gap-2">
+        <div className="senra-header-meta flex flex-col items-end gap-2 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
             <SectorToggle onSelect={setActiveSector} />
             {displayStates && (
               <button
@@ -97,7 +97,7 @@ export default function DashboardPage() {
             )}
           </div>
           {meta && (
-            <div className="flex gap-4 text-xs text-text-tertiary">
+            <div className="senra-header-meta-line flex gap-4 text-xs text-text-tertiary flex-wrap justify-end">
               <span>Updated {meta.last_updated ? new Date(meta.last_updated).toLocaleDateString() : '—'}</span>
               <span>Avg confidence: {meta.avg_confidence.toFixed(0)}%</span>
               <span className={meta.status === 'success' ? 'text-low' : 'text-high'}>{meta.status}</span>
@@ -107,14 +107,14 @@ export default function DashboardPage() {
       </div>
 
       {/* Main layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
-        {/* Map */}
+      <div className="senra-main-grid grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
+        {/* Map column: map shell + (mobile-only) legend below */}
+        <div className="flex flex-col">
         <motion.div
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.15, duration: 0.4 }}
-          className="relative bg-bg-base border border-border-default rounded-2xl overflow-hidden"
-          style={{ height: '560px' }}
+          className="senra-map-shell relative bg-bg-base border border-border-default rounded-2xl overflow-hidden"
         >
           {displayStates && (
             <IndiaMap
@@ -135,8 +135,8 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Legend */}
-          <div className="absolute bottom-4 left-4 bg-bg-void/80 backdrop-blur-sm rounded-lg px-3 py-2 flex flex-col gap-1.5">
+          {/* Legend — desktop/tablet overlay (hidden on mobile) */}
+          <div className="senra-map-legend-overlay absolute bottom-4 left-4 bg-bg-void/80 backdrop-blur-sm rounded-lg px-3 py-2 flex flex-col gap-1.5">
             {[['CRITICAL', '#C0341D'], ['HIGH', '#CC7A0A'], ['MODERATE', '#AA9700'], ['LOW', '#2A8556']].map(([label, color]) => (
               <div key={label} className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: color }} />
@@ -145,6 +145,17 @@ export default function DashboardPage() {
             ))}
           </div>
         </motion.div>
+
+        {/* Legend — mobile-only row below map */}
+        <div className="senra-map-legend-mobile">
+          {[['CRITICAL', '#C0341D'], ['HIGH', '#CC7A0A'], ['MODERATE', '#AA9700'], ['LOW', '#2A8556']].map(([label, color]) => (
+            <div key={label} className="senra-map-legend-mobile-item">
+              <div className="senra-map-legend-mobile-dot" style={{ background: color }} />
+              <span>{label}</span>
+            </div>
+          ))}
+        </div>
+        </div>
 
         {/* Right panel — desktop + tablet */}
         <motion.div

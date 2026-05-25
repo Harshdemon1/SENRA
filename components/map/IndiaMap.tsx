@@ -300,21 +300,6 @@ export const IndiaMap = memo(function IndiaMap({ scores, selectedSlug, onSelect 
         )}
       </div>
 
-      {/* Mobile zoom controls */}
-      {isMobile && (
-        <div className="absolute bottom-28 right-4 flex flex-col gap-1 z-30">
-          {['+', '−'].map((label, i) => (
-            <button
-              key={label}
-              onClick={() => setZoom(z => i === 0 ? Math.min(z * 1.4, 8) : Math.max(z / 1.4, 0.8))}
-              className="w-10 h-10 bg-bg-elevated border border-border-default rounded-lg text-text-secondary text-xl flex items-center justify-center hover:text-text-primary"
-              aria-label={i === 0 ? 'Zoom in' : 'Zoom out'}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   )
 })

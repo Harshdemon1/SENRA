@@ -39,13 +39,14 @@ export function ScoreRanking({ states, isLoading }: ScoreRankingProps) {
 
   return (
     <div className="overflow-y-auto flex-1">
-      <div className="px-3 py-2 border-b border-border-subtle flex items-center gap-2">
+      <div className="senra-search-row px-3 py-2 border-b border-border-subtle flex items-center gap-2">
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search states…"
-          className="flex-1 bg-bg-elevated border border-border-default rounded-md px-2 py-1 text-xs text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
+          className="senra-search-input flex-1 bg-bg-elevated border border-border-default rounded-md px-2 py-1 text-xs text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-accent"
         />
+        <div className="senra-sort-buttons flex items-center gap-2">
         <button
           onClick={() => setSortBy('alpha')}
           className={`text-xs px-2 py-1 rounded transition-colors flex-shrink-0 ${sortBy === 'alpha' ? 'bg-accent text-bg-void' : 'text-text-secondary hover:text-text-primary border border-border-default'}`}
@@ -58,6 +59,7 @@ export function ScoreRanking({ states, isLoading }: ScoreRankingProps) {
         >
           Rank
         </button>
+        </div>
       </div>
       {sorted.length === 0 && (
         <div className="px-4 py-6 text-center text-xs text-text-tertiary">No states match "{search}"</div>
@@ -68,20 +70,20 @@ export function ScoreRanking({ states, isLoading }: ScoreRankingProps) {
           initial={{ opacity: 0, x: 16 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: Math.min(i * 0.015, 0.3), duration: 0.25 }}
-          className="flex items-center gap-3 px-4 py-2.5 hover:bg-bg-hover cursor-pointer border-b border-border-subtle transition-colors"
+          className="senra-state-row flex items-center gap-3 px-4 py-2.5 hover:bg-bg-hover cursor-pointer border-b border-border-subtle transition-colors"
           onClick={() => router.push(`/state/${state.slug}`)}
         >
-          <span className="numeric text-xs text-text-tertiary w-5 text-right flex-shrink-0">
+          <span className="senra-state-rank numeric text-xs text-text-tertiary w-5 text-right flex-shrink-0">
             {state.rank}
           </span>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-sm font-medium text-text-primary truncate">{state.state}</span>
-              <Badge band={state.band} />
+              <span className="senra-state-name text-sm font-medium text-text-primary truncate">{state.state}</span>
+              <Badge band={state.band} className="senra-band-badge" />
             </div>
             <ScoreBar score={state.score} band={state.band} />
           </div>
-          <span className="numeric text-sm text-text-primary w-8 text-right flex-shrink-0">
+          <span className="senra-state-score-large numeric text-sm text-text-primary w-8 text-right flex-shrink-0">
             {state.score.toFixed(0)}
           </span>
         </motion.div>

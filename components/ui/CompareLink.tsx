@@ -6,11 +6,11 @@ export function CompareLink() {
   const [viewed, markViewed] = useOnce('senra-compare-viewed')
 
   return (
-    <div className="relative inline-flex">
+    <div className="relative inline-flex flex-shrink-0">
       <Link
         href="/compare"
         onClick={markViewed}
-        className="px-3 py-1.5 rounded-full border border-white/20 hover:border-white/50 hover:text-text-primary transition-colors"
+        className="senra-nav-link px-3 py-1.5 rounded-full border border-white/20 hover:border-white/50 hover:text-text-primary transition-colors"
       >
         Compare
       </Link>

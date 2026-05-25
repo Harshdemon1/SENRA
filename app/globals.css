@@ -186,3 +186,137 @@ html, body {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+/* ── Map shell ── desktop default height; mobile overrides below */
+.senra-map-shell {
+  height: 560px;
+}
+
+/* ── Mobile-only legend below the map (hidden on desktop) ── */
+.senra-map-legend-mobile { display: none; }
+
+/* ─────────────────────────────────────────────────────────────
+   SENRA mobile responsive overrides (≤ 768px)
+   Desktop styles above are left untouched.
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Problem 5: General spacing */
+  .senra-page {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .senra-page-title { font-size: 20px; }
+  .senra-page-subtitle { font-size: 12px; }
+  .senra-main-grid { gap: 12px; }
+
+  /* Problem 1: Nav bar — keep logo fixed, scroll only the links */
+  .senra-nav-bar {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .senra-nav-links {
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+  .senra-nav-links::-webkit-scrollbar { display: none; }
+  .senra-nav-link {
+    font-size: 13px;
+    padding: 4px 12px;
+    flex-shrink: 0;
+  }
+
+  /* Problem 2: Sector pills — already scrollable; tighten sizing */
+  .senra-sector-pill {
+    font-size: 12px;
+    padding: 4px 12px;
+  }
+
+  /* Problem 3: Map container shrinks; legend moves below as a horizontal row */
+  .senra-map-shell {
+    height: auto;
+    min-height: 320px;
+    max-height: 380px;
+    overflow: hidden;
+  }
+  .senra-map-shell svg {
+    width: 100%;
+    height: auto;
+  }
+  /* Hide the absolute-positioned overlay legend on mobile */
+  .senra-map-legend-overlay { display: none !important; }
+  /* Show the horizontal legend below the map */
+  .senra-map-legend-mobile {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    justify-content: center;
+    padding: 8px 0;
+    margin-top: 8px;
+  }
+  .senra-map-legend-mobile-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .senra-map-legend-mobile-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* Problem 4: State list rows */
+  .senra-state-row {
+    padding: 8px 12px;
+  }
+  .senra-state-score-large { display: none; }
+  .senra-state-name {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+  }
+  .senra-band-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  .senra-state-rank {
+    font-size: 12px;
+    min-width: 20px;
+  }
+
+  /* Problem 6: Stack search above sort buttons on mobile */
+  .senra-search-row {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .senra-search-input { width: 100%; }
+  .senra-sort-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  /* Meta line under the sector pills: align left, wrap, smaller gap */
+  .senra-header-meta {
+    align-items: flex-start;
+    width: 100%;
+  }
+  .senra-header-meta-line {
+    gap: 10px;
+    justify-content: flex-start;
+    font-size: 11px;
+  }
+
+  /* Prevent horizontal page scroll on mobile */
+  html, body { overflow-x: hidden; }
+}

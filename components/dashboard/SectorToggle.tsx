@@ -28,7 +28,7 @@ export function SectorToggle({ onSelect }: { onSelect?: (s: string) => void } = 
           onClick={() => { setSector(key); onSelect?.(key) }}
           title={key === 'fmcg' ? 'Fast-Moving Consumer Goods' : undefined}
           className={clsx(
-            'relative flex-shrink-0 text-xs px-3 py-1 rounded-full transition-colors font-medium',
+            'senra-sector-pill relative flex-shrink-0 text-xs px-3 py-1 rounded-full transition-colors font-medium',
             sector === key
               ? 'bg-accent text-bg-void'
               : 'text-text-secondary hover:text-text-primary border border-border-default hover:border-accent/50'
