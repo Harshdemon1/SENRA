@@ -2,9 +2,9 @@
 
 > A data intelligence tool scoring all 37 Indian states and Union Territories on supply chain risk across 7 structural dimensions. Built to support distribution strategy, logistics planning, and regional risk assessment.
 
-**Live tool:** [senra.vercel.app](https://senra.vercel.app)  
-**Author:** Harsh Menon · Cambridge AS Level candidate · Mumbai, India  
-**Data vintage:** 2023–24 government publications
+Live tool: https://senra.in  
+Author: Harsh Menon · Cambridge AS Level candidate · Mumbai, India  
+Data vintage: 2023–24 government publications
 
 ---
 
@@ -62,14 +62,7 @@ Full methodology, data sources, normalisation formula, and limitations: [senra.v
 - **Deployment:** Vercel (deploys from `main`)
 - **No external API dependencies** — all scores are precomputed from static government data
 
----
 
-## Quick start
-
-```bash
-npm install
-npm run dev
-# Open http://localhost:3000
 ```
 
 The database is created and seeded automatically on first load. No setup, no accounts, no environment variables needed.
