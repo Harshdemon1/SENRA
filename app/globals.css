@@ -235,12 +235,15 @@ html, body {
     padding: 4px 12px;
   }
 
-  /* Problem 3: Map container shrinks; legend moves below as a horizontal row */
+  /* Problem 3: Map container shrinks; legend moves below as a horizontal row.
+     overflow: visible + no max-height so the projection (re-scaled in JS for
+     mobile) is never clipped; min-height keeps the shell tall enough that the
+     map doesn't squash on very small screens. */
   .senra-map-shell {
     height: auto;
-    min-height: 320px;
-    max-height: 380px;
-    overflow: hidden;
+    min-height: 380px;
+    width: 100%;
+    overflow: visible;
   }
   .senra-map-shell svg {
     width: 100%;

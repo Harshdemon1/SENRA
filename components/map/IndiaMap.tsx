@@ -129,7 +129,7 @@ function MapSkeleton() {
 // actually changed.
 export const IndiaMap = memo(function IndiaMap({ scores, selectedSlug, onSelect }: IndiaMapProps) {
   const router = useRouter()
-  const isMobile = useMediaQuery('(max-width: 480px)')
+  const isMobile = useMediaQuery('(max-width: 768px)')
 
   // Tooltip: content in state (fires only on polygon boundary cross ≈ rare),
   // position in ref (direct DOM mutation — zero React renders per mousemove frame).
@@ -222,7 +222,7 @@ export const IndiaMap = memo(function IndiaMap({ scores, selectedSlug, onSelect 
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{
-          scale: 1000,
+          scale: isMobile ? 780 : 1000,
           center: [82, 22],
           rotate: [0, 0, 0],
         }}
@@ -231,11 +231,11 @@ export const IndiaMap = memo(function IndiaMap({ scores, selectedSlug, onSelect 
         style={{ willChange: 'transform', outline: 'none', background: 'transparent' }}
       >
         <ZoomableGroup
-          zoom={isMobile ? zoom * 1.4 : zoom}
+          zoom={zoom}
           center={[82, 22]}
           minZoom={0.8}
           maxZoom={8}
-          onMoveEnd={({ zoom: z }) => setZoom(isMobile ? z / 1.4 : z)}
+          onMoveEnd={({ zoom: z }) => setZoom(z)}
         >
           <Geographies geography={geoData ?? GEO_URL}>
             {({ geographies }) => {
