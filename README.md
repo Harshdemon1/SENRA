@@ -50,7 +50,7 @@ Six sector presets (Default, FMCG, Pharma, Cold Chain, E-Commerce, Agriculture) 
 
 Scores are normalised using clipped min-max normalisation (5th–95th percentile clipping to prevent outlier compression). Higher scores indicate higher fragility. Risk bands: CRITICAL (≥70), HIGH (50–69), MODERATE (30–49), LOW (<30).
 
-Full methodology, data sources, normalisation formula, and limitations: https://senra.in.methodology
+Full methodology, data sources, normalisation formula, and limitations: https://senra.in/methodology
 
 ---
 
@@ -102,7 +102,7 @@ See the [Limitations section](https://senra.vercel.app/methodology#limitations) 
 
 ```
 Menon, Harsh. (2024). SENRA: Supply and Economic Network Risk Analysis [Data tool].
-Retrieved from https://senra.vercel.app
+Retrieved from https://senra.in
 ```
 
 ---
